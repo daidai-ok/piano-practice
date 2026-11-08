@@ -4,12 +4,17 @@
   "private": true,
   "type": "module",
   "description": "ジャズピアノのコード・五度圏・Ⅱ–Ⅴ–Ⅰを学ぶ練習ツール",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "node scripts/serve.js",
     "start": "node scripts/serve.js",
     "test": "node --test",
     "build": "node scripts/build.js",
     "preview": "node scripts/serve.js --dist"
+  },
+  "devDependencies": {
+    "wrangler": "4.158.0"
   }
 }

@@ -4,7 +4,7 @@
 
 ## 起動
 
-Node.js 22以上を使用します。追加パッケージのインストールは不要です。
+Node.js 22以上を使用します。アプリの起動には追加パッケージのインストールは不要です。Cloudflareへの公開・公開設定の検証には、初回に `npm ci` でWranglerをインストールします。
 
 ```sh
 npm run dev
@@ -46,6 +46,32 @@ npm run preview
 ```
 
 `dist/` に静的サイトを出力します。`npm run preview` はそのビルドを配信します。外部API・CDN・ランタイム依存パッケージはありません。開発サーバーはループバックアドレスのみにバインドします。
+
+## Cloudflare Workersで公開
+
+Workers Static Assetsで、`dist/` のHTML・CSS・JavaScriptを配信します。`wrangler.jsonc` の `name` はCloudflareに作成済みのWorker名と一致させます。
+
+Cloudflareの対象Workerで **Settings → Build** を開き、GitHubリポジトリを連携して次の設定を使います。
+
+| 項目 | 設定値 |
+| --- | --- |
+| Production branch | `main` |
+| Root directory | リポジトリ直下 |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| ビルド環境変数 | `NODE_VERSION=22` |
+
+公開ファイルの場所は `wrangler.jsonc` の `assets.directory` に指定しています。設定ファイルと `package.json`、`package-lock.json` をGitHubへpushすると、Cloudflareがビルド・デプロイします。成功後は管理画面に表示されるWorkersの公開URLからアクセスできます。
+
+ローカルで、実際には公開せず設定を検証するには次を実行します。
+
+```sh
+npm ci
+npm run build
+npx wrangler deploy --dry-run
+```
+
+参考：[Workersのビルド設定](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)・[静的アセットの設定](https://developers.cloudflare.com/workers/static-assets/binding/)
 
 ## 構成
 
