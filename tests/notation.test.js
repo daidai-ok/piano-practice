@@ -26,7 +26,7 @@ test('middle C is the same key on the lower treble and upper bass ledger lines',
 test('staff advances diatonically, with every note visible on its corresponding keyboard', () => {
   for (const clef of CLEFS) {
     const notes = staffNotes(clef.id);
-    assert.equal(notes.length, 13);
+    assert.equal(notes.length, clef.id === 'treble' ? 21 : 13);
     assert.equal(staffNote(clef.referenceMidi, clef.id).step, clef.referenceStep);
     for (let index = 0; index < notes.length; index++) {
       const note = notes[index];
@@ -38,4 +38,14 @@ test('staff advances diatonically, with every note visible on its corresponding 
       if (note.step >= 0 && note.step <= 8) assert.deepEqual(note.ledgerSteps, []);
     }
   }
+});
+
+test('extended treble notes below C4 and above A5 have the correct ledger lines', () => {
+  const notes = staffNotes('treble');
+  assert.deepEqual(notes.slice(0, 4).map(note => [note.label, note.ledgerSteps]), [
+    ['F3', [-2, -4, -6]], ['G3', [-2, -4]], ['A3', [-2, -4]], ['B3', [-2]],
+  ]);
+  assert.deepEqual(notes.slice(-4).map(note => [note.label, note.ledgerSteps]), [
+    ['B5', [10]], ['C6', [10, 12]], ['D6', [10, 12]], ['E6', [10, 12, 14]],
+  ]);
 });

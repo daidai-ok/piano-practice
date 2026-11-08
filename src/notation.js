@@ -5,8 +5,8 @@ const naturalPitches = [0, 2, 4, 5, 7, 9, 11];
 const syllables = ['ド', 'レ', 'ミ', 'ファ', 'ソ', 'ラ', 'シ'];
 
 export const CLEFS = [
-  { id: 'treble', name: 'ト音記号', glyph: '\uE050', bottomMidi: 64, start: 60, end: 81,
-    keyboardStart: 60, keyboardEnd: 84, referenceMidi: 67, referenceStep: 2,
+  { id: 'treble', name: 'ト音記号', glyph: '\uE050', bottomMidi: 64, start: 53, end: 88,
+    keyboardStart: 53, keyboardEnd: 88, referenceMidi: 67, referenceStep: 2,
     description: '高い音域を読む記号。下から2本目の線が「ソ（G4）」です。',
     lines: 'ミ・ソ・シ・レ・ファ', spaces: 'ファ・ラ・ド・ミ' },
   { id: 'bass', name: 'ヘ音記号', glyph: '\uE062', bottomMidi: 43, start: 40, end: 60,

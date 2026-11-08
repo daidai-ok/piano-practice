@@ -41,6 +41,7 @@ function keyboard(chord, id, compact = false, options = {}) {
   const start = options.start ?? 48;
   const end = options.end ?? 72;
   const { keys, whiteCount } = keyboardKeys(start, end);
+  const middleMidi = keys.filter(key => !key.black)[Math.floor(whiteCount / 2)].midi;
   const clef = CLEFS.find(item => item.id === options.clef);
   const register = midi => `${midiLabel(midi)}${midi === 60 ? ' <span class="middle-c">中央ド</span>' : ''}`;
   return `<div class="keyboard-wrap ${compact ? 'compact' : ''}">
@@ -54,7 +55,7 @@ function keyboard(chord, id, compact = false, options = {}) {
         </button>`;
       }).join('')}
     </div>
-    <div class="keyboard-register"><span>${register(start)}</span><span>${register(start + 12)}</span><span>${register(end)}</span></div>
+    <div class="keyboard-register"><span>${register(start)}</span><span>${register(middleMidi)}</span><span>${register(end)}</span></div>
   </div>`;
 }
 
