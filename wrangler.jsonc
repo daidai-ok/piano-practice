@@ -1,7 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  // Workers Builds supplies the connected Worker's name.
-  // For local deployment, pass --name or add the existing Worker's name here.
+  "name": "piano-practice",
   "main": "worker/index.js",
   "compatibility_date": "2026-11-08",
   "compatibility_flags": ["nodejs_compat"],

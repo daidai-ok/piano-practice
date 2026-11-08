@@ -1,2 +1,2 @@
-# Copy this file to .dev.vars and set the local preview password.
+# Copy this file to .dev.vars and set the password for local preview and make deploy.
 BASIC_AUTH_PASSWORD=""

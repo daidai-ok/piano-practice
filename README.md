@@ -52,7 +52,26 @@ npm run preview
 
 Cloudflare WorkerがBASIC認証を行い、認証後にWorkers Static Assetsで `dist/` のHTML・CSS・JavaScriptを配信します。`assets.run_worker_first: true` により、JavaScript・CSS・画像への直接アクセスも認証対象です。
 
-Workers Buildsからのデプロイでは、Cloudflareが連携先のWorker名をWranglerに渡します。このため `wrangler.jsonc` の `name` は省略しています。ローカルから本番へデプロイする場合は、`--name` で既存のWorker名を指定するか、設定ファイルに同じ `name` を追加してください。
+公開先のWorker名は、`wrangler.jsonc` の `name` に `piano-practice` を設定しています。
+
+### 手動デプロイ
+
+初回は依存パッケージをインストールし、Cloudflareにログインします。
+
+```sh
+npm ci
+npx wrangler login
+```
+
+`.dev.vars` がまだなければ `.dev.vars.example` をコピーし、`BASIC_AUTH_PASSWORD` に公開時のパスワードを設定します。以降はリポジトリ直下で次を実行します。
+
+```sh
+make deploy
+```
+
+ビルド後、`piano-practice` にデプロイし、`.dev.vars` のパスワードを本番のSecretとして登録・更新します。ユーザー名は `root` です。完了後、ターミナルに表示される公開URLからアクセスできます。GitHubへのpushは不要です。
+
+### GitHub連携での自動デプロイ
 
 Cloudflareの対象Workerで **Settings → Build** を開き、GitHubリポジトリを連携して次の設定を使います。
 
@@ -68,7 +87,7 @@ Cloudflareの対象Workerで **Settings → Build** を開き、GitHubリポジ�
 
 ### BASIC認証のパスワード設定
 
-ユーザー名は `root` です。対象Workerの **Settings → Variables and Secrets → Add** で、種類を **Secret**、名前を **BASIC_AUTH_PASSWORD** にして、使用するパスワードを設定・デプロイしてください。これは実行時のSecretで、ビルド用の環境変数ではありません。パスワードが未設定・空の場合は503を返し、サイトを配信しません。
+ユーザー名は `root` です。`make deploy` では `.dev.vars` の `BASIC_AUTH_PASSWORD` を本番のSecretに登録します。管理画面から設定する場合は、対象Workerの **Settings → Variables and Secrets → Add** で、種類を **Secret**、名前を **BASIC_AUTH_PASSWORD** にして、使用するパスワードを設定・デプロイしてください。これは実行時のSecretで、ビルド用の環境変数ではありません。パスワードが未設定・空の場合は503を返し、サイトを配信しません。
 
 パスワードをソースコードや `wrangler.jsonc` に書く必要はありません。認証処理は `worker/` にあり、ブラウザに配信する `dist/` には含まれません。認証済みのレスポンスにも `Cache-Control: private, no-store` を付けます。
 
@@ -86,7 +105,7 @@ npm run preview:auth
 ```sh
 npm ci
 npm run build
-npx wrangler deploy --dry-run --name piano-practice-validation
+npx wrangler deploy --dry-run --secrets-file .dev.vars
 ```
 
 参考：[Workersのビルド設定](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)・[静的アセットの設定](https://developers.cloudflare.com/workers/static-assets/binding/)・[Secretの設定](https://developers.cloudflare.com/workers/configuration/secrets/)・[Workers BuildsのWorker名](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/#workers-name-requirement)
@@ -104,6 +123,7 @@ src/reading.js    ト音記号・ヘ音記号の読譜画面
 src/fonts/       Bravura楽譜フォントとOFLライセンス
 worker/index.js   CloudflareでのBASIC認証・静的ファイル配信
 wrangler.jsonc    Cloudflare Workersの公開設定
+Makefile         ビルド・手動デプロイ（make deploy）
 tests/           音楽理論・音声制御の自動テスト
 scripts/         開発サーバー・静的ビルド
 ```
