@@ -25,6 +25,7 @@ npm run dev
 - **ルート入りのフォーノート**：Ⅱ–Ⅴ–Ⅰを「基本形」と「転回形でつなぐ」で切り替え。どちらも各コードの4構成音を1回ずつ含みます。転回形ではルートが最低音とは限りません。転回形名、最低音、低い音からの構成音・度数を表示し、鍵盤と音声も同じ並びになります。
 - **メジャー／マイナー切替**：メジャーは ii7–V7–Imaj7。マイナーは iiø7–V7–i(maj7)。マイナーのトニックには複数の選択肢がありますが、この初版では m(maj7) を採用しています。
 - **選択状態の保存**：ルート、コード種、画面、解決先、調性、ヴォイシングをブラウザ内に保存。
+- **楽譜の読み方**：ト音記号（C4〜A5）・ヘ音記号（E2〜C4）の音符を選び、対応する鍵盤・ドレミ・音名・五線上の位置を確認して試聴。表示範囲内の白鍵から音符も選択できます。「中央ドを両方で見る」で、同じC4が両記号の加線に現れることを比較できます。五線譜は狭い画面で横スクロール、音符は左右矢印・Home・Endでも移動できます。
 - **スマートフォン・キーボード操作**：Tab／Enter／Spaceで操作。鍵盤間は左右矢印、Home／Endで移動。Escapeで音を停止。
 
 音声はWeb Audio APIによる合成音です。最初の再生操作で音声を有効にします。実際のピアノ音源、MIDI接続、ルートレスヴォイシングは対象外です。コード一覧は基本形、Ⅱ–Ⅴ–Ⅰは基本形と転回形を切り替えられます。
@@ -49,7 +50,9 @@ npm run preview
 
 ## Cloudflare Workersで公開
 
-Workers Static Assetsで、`dist/` のHTML・CSS・JavaScriptを配信します。`wrangler.jsonc` の `name` はCloudflareに作成済みのWorker名と一致させます。
+Cloudflare WorkerがBASIC認証を行い、認証後にWorkers Static Assetsで `dist/` のHTML・CSS・JavaScriptを配信します。`assets.run_worker_first: true` により、JavaScript・CSS・画像への直接アクセスも認証対象です。
+
+Workers Buildsからのデプロイでは、Cloudflareが連携先のWorker名をWranglerに渡します。このため `wrangler.jsonc` の `name` は省略しています。ローカルから本番へデプロイする場合は、`--name` で既存のWorker名を指定するか、設定ファイルに同じ `name` を追加してください。
 
 Cloudflareの対象Workerで **Settings → Build** を開き、GitHubリポジトリを連携して次の設定を使います。
 
@@ -63,15 +66,30 @@ Cloudflareの対象Workerで **Settings → Build** を開き、GitHubリポジ�
 
 公開ファイルの場所は `wrangler.jsonc` の `assets.directory` に指定しています。設定ファイルと `package.json`、`package-lock.json` をGitHubへpushすると、Cloudflareがビルド・デプロイします。成功後は管理画面に表示されるWorkersの公開URLからアクセスできます。
 
+### BASIC認証のパスワード設定
+
+ユーザー名は `root` です。対象Workerの **Settings → Variables and Secrets → Add** で、種類を **Secret**、名前を **BASIC_AUTH_PASSWORD** にして、使用するパスワードを設定・デプロイしてください。これは実行時のSecretで、ビルド用の環境変数ではありません。パスワードが未設定・空の場合は503を返し、サイトを配信しません。
+
+パスワードをソースコードや `wrangler.jsonc` に書く必要はありません。認証処理は `worker/` にあり、ブラウザに配信する `dist/` には含まれません。認証済みのレスポンスにも `Cache-Control: private, no-store` を付けます。
+
+ローカルでBASIC認証を確認する場合は、`.dev.vars.example` を `.dev.vars` にコピーしてパスワードを設定し、次を実行します。`.dev.vars` はGitの管理対象外です。
+
+```sh
+npm ci
+npm run preview:auth
+```
+
+`http://localhost:8787` を開くとブラウザ標準の認証ダイアログが表示されます。通常の `npm run dev` / `npm run preview` はローカルでアプリを開発するための認証なしサーバーです。
+
 ローカルで、実際には公開せず設定を検証するには次を実行します。
 
 ```sh
 npm ci
 npm run build
-npx wrangler deploy --dry-run
+npx wrangler deploy --dry-run --name piano-practice-validation
 ```
 
-参考：[Workersのビルド設定](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)・[静的アセットの設定](https://developers.cloudflare.com/workers/static-assets/binding/)
+参考：[Workersのビルド設定](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)・[静的アセットの設定](https://developers.cloudflare.com/workers/static-assets/binding/)・[Secretの設定](https://developers.cloudflare.com/workers/configuration/secrets/)・[Workers BuildsのWorker名](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/#workers-name-requirement)
 
 ## 構成
 
@@ -81,6 +99,11 @@ src/audio.js      Web Audioによる発音と再生制御
 src/app.js        画面・鍵盤・五度圏・操作
 src/tokens.css    色とフォントのトークン
 src/styles.css    レスポンシブレイアウト
+src/notation.js   音符の高さ・加線・鍵盤位置の対応
+src/reading.js    ト音記号・ヘ音記号の読譜画面
+src/fonts/       Bravura楽譜フォントとOFLライセンス
+worker/index.js   CloudflareでのBASIC認証・静的ファイル配信
+wrangler.jsonc    Cloudflare Workersの公開設定
 tests/           音楽理論・音声制御の自動テスト
 scripts/         開発サーバー・静的ビルド
 ```
@@ -89,5 +112,8 @@ scripts/         開発サーバー・静的ビルド
 
 - [Open Music Theory — Triads and seventh chords](https://openmusictheory.github.io/triads.html)
 - [Music Theory for the 21st-Century Classroom — Standard Chord Progressions](https://musictheory.pugetsound.edu/mt21c/StandardChordProgressions.html)
+- [Open Music Theory — Reading Clefs](https://viva.pressbooks.pub/openmusictheory/chapter/clefs/)
 
 独自の音楽理論計算を実装しており、参考資料からのコードや楽譜の転載はありません。
+
+音部記号には[SteinbergのBravura](https://github.com/steinbergmedia/bravura)を使用しています（SIL Open Font License 1.1）。フォントとライセンスは `src/fonts/` に同梱し、外部CDNにはアクセスしません。

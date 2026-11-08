@@ -7,7 +7,7 @@ const project = fileURLToPath(new URL('../', import.meta.url));
 const root = await realpath(resolve(project, process.argv.includes('--dist') ? 'dist' : '.'));
 const portIndex = process.argv.indexOf('--port');
 const port = Number(portIndex >= 0 ? process.argv[portIndex + 1] : process.env.PORT || 5173);
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json' };
+const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff': 'font/woff' };
 
 const server = createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405); res.end(); return; }

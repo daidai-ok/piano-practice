@@ -1,5 +1,7 @@
 import { ROOTS, ROOT_SPELLINGS, CIRCLE, RELATIVE_MINORS, MINOR_ROOTS, SIGNATURES, FOCUS_QUALITIES, QUALITIES, getChord, getVoicedProgression, getScale, circleTonic, practiceKey, keyboardKeys, pitchClass, midiLabel } from './theory.js';
 import { PianoAudio } from './audio.js';
+import { CLEFS, staffNotes, staffNote } from './notation.js';
+import { readingView } from './reading.js';
 
 const icons = {
   keyboard: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 5v14m8-14v14M7 5v7h3V5m4 0v7h3V5"/>',
@@ -19,12 +21,13 @@ const app = document.querySelector('#app');
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem('voicing-settings') || '{}') || {}; } catch { /* Storage is optional. */ }
 const state = {
-  view: saved.view === 'circle' ? 'circle' : 'chords',
+  view: ['circle', 'reading'].includes(saved.view) ? saved.view : 'chords',
   root: ROOT_SPELLINGS.flat().includes(saved.root) ? saved.root : 'C',
   quality: QUALITIES.some(item => item.id === saved.quality) ? saved.quality : 'maj7',
   tonic: ROOT_SPELLINGS.flat().includes(saved.tonic) ? saved.tonic : 'C',
   mode: saved.mode === 'minor' ? 'minor' : 'major',
   voicing: saved.voicing === 'connected' ? 'connected' : 'root',
+  reading: Object.fromEntries(CLEFS.map(clef => [clef.id, staffNotes(clef.id).some(note => note.midi === saved.reading?.[clef.id]) ? saved.reading[clef.id] : clef.referenceMidi])),
   playing: null,
 };
 state.tonic = circleTonic(state.tonic, state.mode);
@@ -34,19 +37,24 @@ function persist() {
   try { localStorage.setItem('voicing-settings', JSON.stringify(settings)); } catch { /* Private browsing can disable storage. */ }
 }
 
-function keyboard(chord, id, compact = false) {
-  const { keys, whiteCount } = keyboardKeys();
+function keyboard(chord, id, compact = false, options = {}) {
+  const start = options.start ?? 48;
+  const end = options.end ?? 72;
+  const { keys, whiteCount } = keyboardKeys(start, end);
+  const clef = CLEFS.find(item => item.id === options.clef);
+  const register = midi => `${midiLabel(midi)}${midi === 60 ? ' <span class="middle-c">中央ド</span>' : ''}`;
   return `<div class="keyboard-wrap ${compact ? 'compact' : ''}">
-    <div class="piano" role="group" aria-label="${escape(chord.symbol)}の鍵盤。色の付いた鍵盤が構成音" style="--white-count:${whiteCount}">
+    <div class="piano" role="group" aria-label="${escape(chord.symbol)}の鍵盤。色の付いた鍵盤が${options.reading ? '選択中の音' : '構成音'}" style="--white-count:${whiteCount}">
       ${keys.map(key => {
         const note = chord.notes.find(note => note.midi === key.midi);
-        return `<button type="button" class="piano-key ${key.black ? 'black' : 'white'} ${note ? 'chord-tone' : ''} ${note?.isRoot ? 'root-tone' : ''}" style="--key-position:${key.position}" data-action="note" data-midi="${key.midi}" data-focus="${id}-key-${key.midi}" tabindex="${key.midi === chord.notes[0].midi ? 0 : -1}" aria-label="${escape(note ? `${note.name}、${note.degree}度、${midiLabel(key.midi)}` : key.label)}${note ? '、構成音' : ''}">
-          ${note ? `<span class="key-degree">${note.isRoot ? 'R' : note.degree}</span>` : ''}
-          <span class="key-label">${escape(note?.name || key.label.replace(/\d/, ''))}</span>
+        const readingKey = clef && !key.black && key.midi >= clef.start && key.midi <= clef.end;
+        return `<button type="button" class="piano-key ${key.black ? 'black' : 'white'} ${note ? 'chord-tone' : ''} ${note?.isRoot ? 'root-tone' : ''}" style="--key-position:${key.position}" data-action="${readingKey ? 'reading-note' : 'note'}" ${clef ? `data-clef="${clef.id}"` : ''} data-midi="${key.midi}" data-focus="${id}-key-${key.midi}" tabindex="${key.midi === chord.notes[0].midi ? 0 : -1}" aria-label="${escape(note ? options.reading ? `${note.syllable}、${note.label}、選択中の音` : `${note.name}、${note.degree}度、${midiLabel(key.midi)}、構成音` : key.label)}">
+          ${note && !options.reading ? `<span class="key-degree">${note.isRoot ? 'R' : note.degree}</span>` : ''}
+          <span class="key-label">${escape(options.reading ? key.label : note?.name || key.label.replace(/\d/, ''))}</span>
         </button>`;
       }).join('')}
     </div>
-    <div class="keyboard-register"><span>C3</span><span>C4 <span class="middle-c">中央ド</span></span><span>C5</span></div>
+    <div class="keyboard-register"><span>${register(start)}</span><span>${register(start + 12)}</span><span>${register(end)}</span></div>
   </div>`;
 }
 
@@ -150,18 +158,30 @@ function scaleSection() {
 
 function render() {
   const focusKey = document.activeElement?.dataset.focus;
+  const staffScroll = [...app.querySelectorAll('.staff-scroll')].map(element => element.scrollLeft);
   app.innerHTML = `<div class="app-shell">
     <aside class="sidebar"><a class="brand" href="#chords" data-action="home" aria-label="voicing. コード一覧へ"><span class="brand-icon">${icon('keyboard')}</span><span>voicing<span class="brand-period">.</span></span></a><p class="brand-caption">JAZZ PIANO PRACTICE</p>
-      <nav class="main-nav" aria-label="練習メニュー"><button type="button" data-action="view" data-value="chords" data-focus="nav-chords" ${state.view === 'chords' ? 'aria-current="page"' : ''}>${icon('keyboard')}<span>コードを覚える</span></button><button type="button" data-action="view" data-value="circle" data-focus="nav-circle" ${state.view === 'circle' ? 'aria-current="page"' : ''}>${icon('circle')}<span>五度圏とⅡ–Ⅴ–Ⅰ</span></button></nav>
-      <div class="sidebar-bottom"><div class="small-keys" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><p>ひとつずつ、<br />音を自分のものに。</p><span>YOUR DAILY PIANO COMPANION</span></div>
+      <nav class="main-nav" aria-label="練習メニュー"><button type="button" data-action="view" data-value="chords" data-focus="nav-chords" ${state.view === 'chords' ? 'aria-current="page"' : ''}>${icon('keyboard')}<span>コードを覚える</span></button><button type="button" data-action="view" data-value="circle" data-focus="nav-circle" ${state.view === 'circle' ? 'aria-current="page"' : ''}>${icon('circle')}<span>五度圏とⅡ–Ⅴ–Ⅰ</span></button><button type="button" data-action="view" data-value="reading" data-focus="nav-reading" ${state.view === 'reading' ? 'aria-current="page"' : ''}>${icon('book')}<span>楽譜の読み方</span></button></nav>
+      <div class="sidebar-bottom"><div class="small-keys" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><p>ひとつずつ、<br />音を自分のものに。</p></div>
     </aside>
-    <div class="main-shell"><div class="topbar"><span>ジャズピアノの練習室</span><span>${icon('sound')}音で確かめる、指で覚える。</span></div><main id="main" tabindex="-1">${state.view === 'chords' ? chordLibrary() : circleView()}</main><footer class="page-footer"><span>voicing. <span>小さな練習を、毎日の音楽に。</span></span><span>12 KEYS, ENDLESS POSSIBILITIES.</span></footer></div>
+    <div class="main-shell"><main id="main" tabindex="-1">${state.view === 'chords' ? chordLibrary() : state.view === 'circle' ? circleView() : readingView(state.reading, { keyboard, icon })}</main><footer class="page-footer"><span>voicing. <span>小さな練習を、毎日の音楽に。</span></span><span>12 KEYS, ENDLESS POSSIBILITIES.</span></footer></div>
   </div>`;
   if (focusKey) [...app.querySelectorAll('[data-focus]')].find(element => element.dataset.focus === focusKey)?.focus({ preventScroll: true });
+  app.querySelectorAll('.staff-scroll').forEach((element, index) => { element.scrollLeft = staffScroll[index] ?? 0; });
   persist();
 }
 
 function announce(message) { document.querySelector('#announcement').textContent = message; }
+
+function revealStaffNote(clef) {
+  const note = app.querySelector(`.staff-note[data-clef="${clef}"][aria-pressed="true"]`);
+  if (!note) return;
+  const scroller = note.closest('.staff-scroll');
+  const bounds = scroller.getBoundingClientRect();
+  const noteBounds = note.getBoundingClientRect();
+  if (noteBounds.left < bounds.left) scroller.scrollLeft += noteBounds.left - bounds.left;
+  else if (noteBounds.right > bounds.right) scroller.scrollLeft += noteBounds.right - bounds.right;
+}
 
 function syncPlayback() {
   const buttons = [['play-chord', 'コードを聴く'], ['arpeggio', '1音ずつ聴く'], ['play-progression', 'Ⅱ–Ⅴ–Ⅰを聴く'], ['play-scale', 'スケールを聴く']];
@@ -200,6 +220,16 @@ app.addEventListener('click', async event => {
   if (!target) return;
   const { action, value } = target.dataset;
   try {
+    if (action === 'reading-note') {
+      const { clef, midi } = target.dataset;
+      const note = staffNote(Number(midi), clef);
+      stopPlayback();
+      state.reading[clef] = note.midi;
+      render();
+      revealStaffNote(clef);
+      announce(`${CLEFS.find(item => item.id === clef).name}、${note.syllable} ${note.label}、${note.position}${note.middleC ? '、中央ド' : ''}`);
+      return await play([{ notes: [note] }], 'note', { midi: note.midi });
+    }
     if (action === 'note') return await play([{ notes: [{ midi: Number(target.dataset.midi) }] }], 'note', { midi: Number(target.dataset.midi) });
     if (action === 'play-chord' || action === 'arpeggio') return await play([getChord(state.root, state.quality)], action, { arpeggio: action === 'arpeggio' });
     if (action === 'play-progression') return await play(selectedProgression(), action);
@@ -218,6 +248,7 @@ app.addEventListener('click', async event => {
       else state.tonic = practiceKey(state.tonic, Number(value), state.mode);
     }
     if (action === 'view') state.view = value;
+    if (action === 'reading-middle') { state.reading.treble = 60; state.reading.bass = 60; }
     if (action === 'home') { event.preventDefault(); state.view = 'chords'; }
     if (action === 'to-circle') { state.tonic = circleTonic(state.root, state.mode); state.view = 'circle'; }
     if (action === 'inspect') {
@@ -227,8 +258,10 @@ app.addEventListener('click', async event => {
       state.view = 'chords';
     }
     render();
+    if (action === 'reading-middle') CLEFS.forEach(clef => revealStaffNote(clef.id));
     if (oldView !== state.view) { document.querySelector('#main').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' }); }
     if (action === 'voicing') announce(`ルート入りの4音、${state.voicing === 'root' ? '基本形' : '転回形でつなぐ'}。${selectedProgression().map(chord => `${chord.symbol} ${chord.positionName} ${chord.notes.map(note => note.name).join('、')}`).join('。')}`);
+    else if (state.view === 'reading') announce(action === 'reading-middle' ? '中央ド C4。ト音記号の下の加線、ヘ音記号の上の加線。同じ鍵盤の音です。' : '楽譜の読み方。ト音記号とヘ音記号の音符を選ぶと、鍵盤で確認できます。');
     else announce(state.view === 'chords' ? `${getChord(state.root, state.quality).symbol}、構成音 ${getChord(state.root, state.quality).notes.map(note => note.name).join('、')}` : `${state.tonic}${getScale(state.tonic, state.mode).name}、${getScale(state.tonic, state.mode).notes.map(note => note.name).join('、')}。Ⅱ–Ⅴ–Ⅰは${selectedProgression().map(chord => chord.symbol).join('、')}`);
   } catch (error) {
     stopPlayback();
@@ -249,6 +282,13 @@ app.addEventListener('change', event => {
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape') { stopPlayback(); document.querySelector('#audio-error').hidden = true; }
   const key = event.target.closest('.piano-key');
+  const staffKey = event.target.closest('.staff-note');
+  if (staffKey && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+    event.preventDefault();
+    const notes = [...staffKey.parentElement.querySelectorAll('.staff-note')];
+    const index = notes.indexOf(staffKey);
+    notes[event.key === 'Home' ? 0 : event.key === 'End' ? notes.length - 1 : Math.max(0, Math.min(notes.length - 1, index + (event.key === 'ArrowRight' ? 1 : -1)))]?.focus();
+  }
   if (key && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
     const keys = [...key.parentElement.querySelectorAll('.piano-key')];

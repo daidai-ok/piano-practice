@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Workers Builds supplies the connected Worker's name.
+  // For local deployment, pass --name or add the existing Worker's name here.
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-08",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "vars": {
+    "BASIC_AUTH_USER": "root"
+  }
+}
