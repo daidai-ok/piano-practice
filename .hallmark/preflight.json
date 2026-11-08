@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-08",
+  "existingProject": false,
+  "framework": "vanilla ES modules",
+  "palette": "Studio: ivory and forest green",
+  "fonts": "Georgia / Hiragino Kaku Gothic ProN / system monospace",
+  "motion": "press feedback only",
+  "spacing": "4px scale"
+}
