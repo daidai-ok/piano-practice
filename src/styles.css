@@ -158,10 +158,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .destination-title { font: 500 48px var(--font-display); letter-spacing: -1px; margin: 24px 0 8px; }
 .destination-title span { font-size: 32px; color: var(--color-muted); }
 .destination-description { font-size: 15px; font-family: var(--font-display); letter-spacing: .3px; }
-.fifths-tip { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-line); }
-.rotation-symbol { font-size: 27px; line-height: 1; color: var(--color-accent); }
-.fifths-tip p { font-size: 10px; line-height: 1.9; color: var(--color-muted); }
-.fifths-tip strong { font-size: 11px; font-weight: 600; color: var(--color-ink); }
 .enharmonic-note, .minor-explainer { font-size: 9px; color: var(--color-muted); line-height: 1.8; margin-top: 12px; }
 .progression-section { margin-top: 32px; }
 .scale-section { margin-top: 36px; padding: 32px 0; border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); }

@@ -137,7 +137,6 @@ function circleView() {
       <p class="destination-description">${state.mode === 'major' ? 'Ⅱm7 → Ⅴ7 → Ⅰmaj7' : 'Ⅱm7♭5 → Ⅴ7 → Ⅰm(maj7)'}</p>
       <p class="voicing-caption">ルート入り4音 · ${state.voicing === 'root' ? '基本形' : '転回形でつなぐ'}</p>
       <button type="button" class="button primary" data-action="play-progression" data-focus="play-progression">${icon('play')}<span>Ⅱ–Ⅴ–Ⅰを聴く</span></button>
-      <div class="fifths-tip"><span class="rotation-symbol" aria-hidden="true">↻</span><p><strong>時計回りに完全5度</strong><br />C → G → D … と、7半音ずつ進みます。Ⅱ → Ⅴ → Ⅰは、五度圏を反時計回りに2つ戻る動きです。</p></div>
       ${state.mode === 'minor' ? '<p class="minor-explainer">マイナーのⅡ–Ⅴ–Ⅰは、解決感を作るためⅤ7とⅠm(maj7)に導音（上げた第7音）を使います。下のナチュラルマイナースケールとは第7音が異なります。</p>' : '<p class="enharmonic-note">G♭とF♯は、同じ鍵盤で鳴る異名同音です。</p>'}
     </div>
   </section>
