@@ -33,11 +33,10 @@ export function readingView(selected, { keyboard, icon }) {
     <div class="reading-clefs">${CLEFS.map(clef => {
       const note = staffNote(selected[clef.id], clef.id);
       return `<section class="reading-clef" aria-labelledby="${clef.id}-title">
-        <div class="reading-clef-heading"><div><h2 id="${clef.id}-title">${clef.name}</h2><p>${clef.description}</p></div><div class="reading-selection"><span>選択中の音</span><strong>${note.syllable} <small>${note.label}</small></strong><span>${note.middleC ? '中央ド · ' : ''}${note.position}</span></div></div>
+        <div class="reading-clef-heading"><div><h2 id="${clef.id}-title">${clef.name}</h2>${clef.description ? `<p>${clef.description}</p>` : ''}</div><div class="reading-selection"><span>選択中の音</span><strong>${note.syllable} <small>${note.label}</small></strong><span>${note.middleC ? '中央ド · ' : ''}${note.position}</span></div></div>
         ${staff(clef, note.midi)}
-        <div class="staff-hint"><span>音符をタップして選択・試聴</span><span>低い音 ← → 高い音 · 横にスクロール</span></div>
         <div class="reading-memory"><p><span>線の上</span>${clef.lines}</p><p><span>線の間</span>${clef.spaces}</p><span>どちらも下から読む</span></div>
-        <div class="instrument-panel reading-instrument"><div class="instrument-heading"><span>${icon('keyboard')} ${note.syllable}（${note.label}）の鍵盤</span><span>緑色が、選んだ音</span></div>
+        <div class="instrument-panel reading-instrument"><div class="instrument-heading"><span>${icon('keyboard')} ${note.syllable}（${note.label}）の鍵盤</span></div>
           ${keyboard({ symbol: `${clef.name} ${note.syllable} ${note.label}`, notes: [{ ...note, isRoot: true }] }, `reading-${clef.id}`, false, { start: clef.keyboardStart, end: clef.keyboardEnd, reading: true, clef: clef.id })}
         </div>
       </section>`;

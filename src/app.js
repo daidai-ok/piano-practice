@@ -81,14 +81,11 @@ function chordLibrary() {
   const alternative = ROOT_SPELLINGS[pitchClass(state.root)].find(root => root !== state.root);
   const focused = FOCUS_QUALITIES.map(id => QUALITIES.find(q => q.id === id));
   const remaining = QUALITIES.filter(q => !FOCUS_QUALITIES.includes(q.id));
-  return `<header class="page-heading">
-    <div><p class="section-caption">CHORD LIBRARY</p></div>
-  </header>
-  <div class="chord-workbench">
+  return `<div class="chord-workbench">
     <section class="library-panel" aria-label="コードを選択">
       <div class="panel-title"><h2>ルート音</h2></div>
       <div class="root-selector" role="group" aria-label="ルート音">${ROOTS.map((root, index) => { const selected = pitchClass(state.root) === index; const label = selected ? state.root : root; return `<button type="button" data-action="root" data-value="${label}" data-focus="root-${index}" aria-pressed="${selected}">${label}</button>`; }).join('')}</div>
-      <div class="enharmonic-control">${alternative ? `<button type="button" data-action="root" data-value="${alternative}" data-focus="enharmonic" aria-label="ルートを${alternative}表記に切り替え">${state.root} ⇄ ${alternative}<span>異名同音</span></button>` : '<span>12音からルートを選択</span>'}</div>
+      <div class="enharmonic-control">${alternative ? `<button type="button" data-action="root" data-value="${alternative}" data-focus="enharmonic" aria-label="ルートを${alternative}表記に切り替え">${state.root} ⇄ ${alternative}<span>異名同音</span></button>` : ''}</div>
       <div class="mobile-quality"><label for="quality-select">コードの種類</label><select id="quality-select" data-focus="quality-select">${[[focused, 'まず覚える3つ'], [remaining, 'その他のコード']].map(([qualities, label]) => `<optgroup label="${label}">${qualities.map(q => `<option value="${q.id}" ${state.quality === q.id ? 'selected' : ''}>${state.root}${q.symbol} — ${q.name}</option>`).join('')}</optgroup>`).join('')}</select></div>
       <div class="quality-groups"><div class="quality-group"><div class="panel-title"><h2>まず覚える3つ</h2></div><div class="quality-list" role="group" aria-label="優先して練習するコード">${qualityChoices(focused)}</div></div><details class="other-chords" ${FOCUS_QUALITIES.includes(state.quality) ? '' : 'open'}><summary>その他のコード</summary><div class="quality-list" role="group" aria-label="その他のコード">${qualityChoices(remaining)}</div></details></div>
     </section>
@@ -127,14 +124,12 @@ function circleWheel(progression) {
 
 function circleView() {
   const progression = selectedProgression();
-  return `<header class="page-heading"><div><p class="section-caption">CIRCLE OF FIFTHS</p></div><span class="header-mark" aria-hidden="true">${icon('circle')}</span></header>
-  <section class="circle-overview" aria-label="五度圏と解決先">
+  return `<section class="circle-overview" aria-label="五度圏と解決先">
     <div class="wheel-panel">${circleWheel(progression)}</div>
     <div class="resolution-panel"><div class="panel-title"><h2>解決先を選ぶ</h2></div>
       <div class="resolution-controls"><div class="mode-switch" role="group" aria-label="解決先の調性"><button type="button" data-action="mode" data-value="major" data-focus="mode-major" aria-pressed="${state.mode === 'major'}">メジャー</button><button type="button" data-action="mode" data-value="minor" data-focus="mode-minor" aria-pressed="${state.mode === 'minor'}">マイナー</button></div></div>
-      <h2 class="destination-title">${state.tonic}<span> ${state.mode === 'major' ? 'major' : 'minor'}</span></h2>
+      <div class="destination-heading"><h2 class="destination-title">${state.tonic}<span> ${state.mode === 'major' ? 'major' : 'minor'}</span></h2><button type="button" class="button primary destination-play" data-action="play-progression" data-focus="play-progression" aria-label="Ⅱ–Ⅴ–Ⅰを聴く">${icon('play')}</button></div>
       <p class="destination-description">${state.mode === 'major' ? 'Ⅱm7 → Ⅴ7 → Ⅰmaj7' : 'Ⅱm7♭5 → Ⅴ7 → Ⅰm(maj7)'}</p>
-      <button type="button" class="button primary" data-action="play-progression" data-focus="play-progression">${icon('play')}<span>Ⅱ–Ⅴ–Ⅰを聴く</span></button>
       ${state.mode === 'minor' ? '<p class="minor-explainer">マイナーのⅡ–Ⅴ–Ⅰは、解決感を作るためⅤ7とⅠm(maj7)に導音（上げた第7音）を使います。下のナチュラルマイナースケールとは第7音が異なります。</p>' : ''}
     </div>
   </section>
@@ -148,7 +143,7 @@ function circleView() {
 
 function scaleSection() {
   const scale = getScale(state.tonic, state.mode);
-  return `<section class="scale-section" aria-label="${scale.root}${scale.name}"><div class="scale-heading"><div><h2><span>${scale.root}</span> ${scale.name}</h2><p>${state.mode === 'major' ? '外側の音をルートにした、1オクターブのメジャースケール。' : '内側の音をルートにした、1オクターブのナチュラルマイナースケール。'}</p></div><button type="button" class="button secondary" data-action="play-scale" data-focus="play-scale">${icon('notes')}<span>スケールを聴く</span></button></div>
+  return `<section class="scale-section" aria-label="${scale.root}${scale.name}"><div class="scale-heading"><div><h2><span>${scale.root}</span> ${scale.name}</h2>${state.mode === 'minor' ? '<p>内側の音をルートにした、1オクターブのナチュラルマイナースケール。</p>' : ''}</div><button type="button" class="button secondary" data-action="play-scale" data-focus="play-scale">${icon('notes')}<span>スケールを聴く</span></button></div>
     <div class="scale-layout"><div class="instrument-panel"><div class="instrument-heading"><span>${icon('keyboard')} スケールの鍵盤</span></div>${keyboard(scale, 'scale')}<div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span><span class="range-label">C3 — C5</span></div></div><div class="scale-details"><h3>スケールの構成音</h3><div class="scale-tones">${scale.notes.map(note => `<div class="scale-tone ${note.isRoot ? 'is-root' : ''}"><span>${note.degree}</span><strong>${note.name}</strong></div>`).join('')}</div></div></div></section>`;
 }
 
@@ -183,7 +178,11 @@ function syncPlayback() {
   const buttons = [['play-chord', 'コードを聴く'], ['arpeggio', '1音ずつ聴く'], ['play-progression', 'Ⅱ–Ⅴ–Ⅰを聴く'], ['play-scale', 'スケールを聴く']];
   buttons.forEach(([action, label]) => {
     const button = app.querySelector(`[data-action="${action}"]`);
-    if (button) button.innerHTML = `${icon(state.playing === action ? 'stop' : ['arpeggio', 'play-scale'].includes(action) ? 'notes' : 'play')}<span>${state.playing === action ? '停止する' : label}</span>`;
+    if (!button) return;
+    const text = state.playing === action ? '停止する' : label;
+    const symbol = icon(state.playing === action ? 'stop' : ['arpeggio', 'play-scale'].includes(action) ? 'notes' : 'play');
+    button.innerHTML = action === 'play-progression' ? symbol : `${symbol}<span>${text}</span>`;
+    if (action === 'play-progression') button.setAttribute('aria-label', text);
   });
 }
 
