@@ -26,8 +26,7 @@ svg { display: inline-block; width: 20px; height: 20px; flex-shrink: 0; vertical
 .brand-icon { display: grid; place-items: center; width: 32px; height: 32px; background: var(--color-accent); border-radius: 6px; color: var(--color-accent-ink); }
 .brand-icon svg { width: 24px; height: 24px; }
 .brand-period { color: var(--color-accent); }
-.brand-caption { margin: 12px 0 24px; font-size: 9px; font-weight: 600; letter-spacing: 1.8px; color: var(--color-muted); }
-.main-nav { display: flex; gap: 4px; }
+.main-nav { display: flex; gap: 4px; margin-top: 24px; }
 .main-nav button { flex: 1; min-height: 48px; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 10px 8px; border-radius: 6px 6px 0 0; font-size: 12px; font-weight: 600; color: var(--color-muted); }
 .main-nav button:hover { background: var(--color-hover); color: var(--color-ink); }
 .main-nav [aria-current] { color: var(--color-accent); background: var(--color-active); }
@@ -49,9 +48,9 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .enharmonic-control { min-height: 28px; padding-top: 8px; color: var(--color-muted); font-size: 9px; }
 .enharmonic-control button { color: var(--color-accent); padding: 2px 0; font-size: 11px; }
 .enharmonic-control button span { margin-left: 12px; font-size: 9px; color: var(--color-muted); }
-.mobile-quality { margin-top: 12px; }
-.mobile-quality label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
-.mobile-quality select { width: 100%; min-height: 44px; padding: 10px 8px; font: 11px var(--font-body); color: var(--color-ink); background: var(--color-surface); border: 1px solid var(--color-line-strong); border-radius: 4px; }
+.mobile-quality { position: fixed; z-index: 5; right: 0; bottom: 0; left: 0; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--color-paper); border-top: 1px solid var(--color-line-strong); }
+.mobile-quality label { display: block; font-size: 12px; line-height: 18px; font-weight: 600; margin-bottom: 8px; }
+.mobile-quality select { width: 100%; min-height: 44px; padding: 10px 8px; font: 16px/22px var(--font-body); color: var(--color-ink); background: var(--color-surface); border: 1px solid var(--color-line-strong); border-radius: 4px; }
 .mobile-quality select:hover { border-color: var(--color-accent); }
 .quality-groups { display: none; gap: 24px; margin-top: 20px; }
 .quality-group .panel-title { margin-bottom: 8px; }
@@ -75,7 +74,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .instrument-panel { background: var(--color-instrument); border: 1px solid var(--color-instrument-line); border-radius: 8px; padding: 16px 12px 14px; }
 .instrument-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 10px; margin-bottom: 20px; }
 .instrument-heading > span:first-child { display: flex; align-items: center; gap: 6px; font-weight: 600; }
-.instrument-heading > span:last-child { color: var(--color-muted); font-size: 9px; }
+.instrument-heading > span + span { color: var(--color-muted); font-size: 9px; }
 .instrument-heading svg { width: 16px; height: 16px; }
 .piano { --white-count: 15; position: relative; height: clamp(144px, 20vw, 208px); background: var(--color-key-black); border: 1px solid var(--color-key-black); border-top: 6px solid var(--color-key-black); border-radius: 4px; box-shadow: 0 4px 0 var(--color-key-base), 0 8px 12px var(--color-shadow); }
 .piano-key { position: absolute; top: 0; padding: 0; display: flex; align-items: center; justify-content: flex-end; flex-direction: column; border-radius: 0 0 3px 3px; transition: transform 100ms var(--ease-out); }
@@ -118,7 +117,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .primary:hover { background: var(--color-accent-dark); }
 .secondary { border: 1px solid var(--color-line-strong); background: var(--color-surface); }
 .secondary:hover { background: var(--color-hover); }
-.synth-note { font-size: 9px; color: var(--color-muted); margin-left: 4px; }
 .learning-note { display: flex; align-items: flex-start; gap: 12px; padding: 20px 0; border-top: 1px solid var(--color-line); }
 .note-icon { color: var(--color-accent); padding-top: 1px; }
 .note-icon svg { width: 18px; height: 18px; }
@@ -127,10 +125,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .next-lesson { display: flex; align-items: center; gap: 12px; padding: 12px 0; font-size: 11px; font-weight: 600; color: var(--color-accent); }
 .next-lesson:hover { text-decoration: underline; text-underline-offset: 4px; }
 .next-lesson svg { width: 16px; }
-.page-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin: 0 20px; padding: 20px 0 24px; border-top: 1px solid var(--color-line); color: var(--color-muted); font-size: 9px; }
-.page-footer > span:first-child { font: 500 16px var(--font-display); }
-.page-footer > span:first-child > span { font: 9px var(--font-body); margin-left: 12px; }
-.page-footer > span:last-child { font-size: 8px; letter-spacing: 1px; }
 .circle-overview { display: grid; gap: 32px; }
 .wheel-panel { min-width: 0; align-self: center; }
 .circle-wheel { position: relative; width: 100%; max-width: 420px; aspect-ratio: 1; margin: auto; }
@@ -164,7 +158,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .destination-title { font: 500 48px var(--font-display); letter-spacing: -1px; margin: 24px 0 8px; }
 .destination-title span { font-size: 32px; color: var(--color-muted); }
 .destination-description { font-size: 15px; font-family: var(--font-display); letter-spacing: .3px; }
-.resolution-copy { font-size: 11px; line-height: 1.9; color: var(--color-muted); margin: 16px 0 20px; }
 .fifths-tip { display: flex; align-items: flex-start; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--color-line); }
 .rotation-symbol { font-size: 27px; line-height: 1; color: var(--color-accent); }
 .fifths-tip p { font-size: 10px; line-height: 1.9; color: var(--color-muted); }
@@ -227,6 +220,13 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .card-bottom svg { width: 13px; height: 13px; }
 .audio-error { position: fixed; right: 16px; bottom: 16px; left: 16px; z-index: 10; padding: 16px 20px; border: 1px solid var(--color-error); border-radius: 6px; background: var(--color-error-paper); color: var(--color-error); font-size: 12px; line-height: 1.8; box-shadow: 0 4px 20px var(--color-shadow); }
 
+@media (width < 38rem) {
+  /* Reserve the fixed selector's 95px height plus the home indicator area. */
+  html:has(.mobile-quality) { scroll-padding-bottom: calc(111px + env(safe-area-inset-bottom, 0px)); }
+  .app-shell:has(.mobile-quality) { padding-bottom: calc(95px + env(safe-area-inset-bottom, 0px)); }
+  body:has(.mobile-quality) .audio-error { bottom: calc(111px + env(safe-area-inset-bottom, 0px)); }
+}
+
 @media (min-width: 38rem) {
   main { padding: 36px 32px 48px; }
   .header-mark { display: grid; place-items: center; color: var(--color-accent); width: 52px; height: 52px; border: 1px solid var(--color-line-strong); border-radius: 50%; }
@@ -243,7 +243,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .chord-detail { border-top: none; border-left: 1px solid var(--color-line); padding: 0 0 0 28px; }
   .instrument-heading { flex-wrap: wrap; }
   .instrument-panel { padding: 18px 14px 16px; }
-  .page-footer { margin: 0 32px; }
   .progression-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .progression-card { padding: 12px; }
   .circle-overview { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 32px; }
@@ -254,8 +253,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .app-shell { display: grid; grid-template-columns: 208px minmax(0, 1fr); }
   .sidebar { position: sticky; top: 0; height: 100dvh; padding: 36px 20px 24px; border-right: 1px solid var(--color-line); border-bottom: 0; display: flex; flex-direction: column; }
   .brand { padding-left: 4px; }
-  .brand-caption { padding-left: 5px; font-size: 8px; margin: 15px 0 48px; }
-  .main-nav { flex-direction: column; gap: 8px; }
+  .main-nav { flex-direction: column; gap: 8px; margin-top: 48px; }
   .main-nav button { justify-content: flex-start; padding: 12px; gap: 10px; border-radius: 5px; font-size: 11px; }
   .main-nav svg { width: 18px; height: 18px; }
   .sidebar-bottom { display: block; margin-top: auto; padding: 32px 10px 4px; }
@@ -271,7 +269,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .quality-name { font-size: 9px; }
   .quality-symbol { font-size: 19px; }
   .page-heading { margin-bottom: 40px; }
-  .page-footer { margin: 0 36px; }
   .circle-overview { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; }
   .scale-layout { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; }
   .scale-section .piano { height: 168px; }
@@ -292,8 +289,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .quality-name { font-size: 10px; }
   .instrument-panel { padding: 20px 24px; }
   .instrument-heading { margin-bottom: 24px; font-size: 11px; }
-  .instrument-heading > span:last-child { font-size: 10px; }
-  .page-footer { margin: 0 48px; }
+  .instrument-heading > span + span { font-size: 10px; }
   .progression-grid { gap: 20px; }
   .progression-card { padding: 20px; }
   .function-name { display: inline; }
@@ -367,8 +363,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .reading-memory > span { margin-left: auto; color: var(--color-muted); font-size: 10px; }
 .reading-instrument .piano { height: 144px; }
 .reading-instrument .key-label { font-size: 11px; }
-.reading-note { margin-top: var(--space-xl); }
-.reading-note p + p { margin-top: var(--space-sm); }
 @media (max-width: 47.99rem) {
   .reading-clef-heading { grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
   .reading-selection { grid-template-columns: auto 1fr; align-items: center; text-align: left; gap: var(--space-sm) var(--space-md); }

@@ -82,28 +82,27 @@ function chordLibrary() {
   const focused = FOCUS_QUALITIES.map(id => QUALITIES.find(q => q.id === id));
   const remaining = QUALITIES.filter(q => !FOCUS_QUALITIES.includes(q.id));
   return `<header class="page-heading">
-    <div><p class="section-caption">CHORD LIBRARY</p><h1>コードを、指で覚える。</h1><p class="page-description">まずは maj7・m7・7 を12キーで。3種類、36コードをひとつずつ。</p></div>
-    <span class="header-mark" aria-hidden="true">${icon('keyboard')}</span>
+    <div><p class="section-caption">CHORD LIBRARY</p></div>
   </header>
   <div class="chord-workbench">
     <section class="library-panel" aria-label="コードを選択">
-      <div class="panel-title"><h2>ルート音</h2><span>ROOT NOTE</span></div>
+      <div class="panel-title"><h2>ルート音</h2></div>
       <div class="root-selector" role="group" aria-label="ルート音">${ROOTS.map((root, index) => { const selected = pitchClass(state.root) === index; const label = selected ? state.root : root; return `<button type="button" data-action="root" data-value="${label}" data-focus="root-${index}" aria-pressed="${selected}">${label}</button>`; }).join('')}</div>
       <div class="enharmonic-control">${alternative ? `<button type="button" data-action="root" data-value="${alternative}" data-focus="enharmonic" aria-label="ルートを${alternative}表記に切り替え">${state.root} ⇄ ${alternative}<span>異名同音</span></button>` : '<span>12音からルートを選択</span>'}</div>
       ${keyPractice(state.root, 'chords')}
       <div class="mobile-quality"><label for="quality-select">コードの種類</label><select id="quality-select" data-focus="quality-select">${[[focused, 'まず覚える3つ'], [remaining, 'その他のコード']].map(([qualities, label]) => `<optgroup label="${label}">${qualities.map(q => `<option value="${q.id}" ${state.quality === q.id ? 'selected' : ''}>${state.root}${q.symbol} — ${q.name}</option>`).join('')}</optgroup>`).join('')}</select></div>
-      <div class="quality-groups"><div class="quality-group"><div class="panel-title"><h2>まず覚える3つ</h2><span>3 TYPES × 12 KEYS</span></div><div class="quality-list" role="group" aria-label="優先して練習するコード">${qualityChoices(focused)}</div></div><details class="other-chords" ${FOCUS_QUALITIES.includes(state.quality) ? '' : 'open'}><summary>その他のコード</summary><div class="quality-list" role="group" aria-label="その他のコード">${qualityChoices(remaining)}</div></details></div>
+      <div class="quality-groups"><div class="quality-group"><div class="panel-title"><h2>まず覚える3つ</h2></div><div class="quality-list" role="group" aria-label="優先して練習するコード">${qualityChoices(focused)}</div></div><details class="other-chords" ${FOCUS_QUALITIES.includes(state.quality) ? '' : 'open'}><summary>その他のコード</summary><div class="quality-list" role="group" aria-label="その他のコード">${qualityChoices(remaining)}</div></details></div>
     </section>
     <section class="chord-detail" aria-label="選択したコード">
       <div class="detail-heading"><div><span class="subtle-label">選択中のコード</span><h2 class="chord-display">${chordSymbol(chord)}</h2><p class="chord-name">${chord.quality.name}</p></div><span class="position-label">基本形 <span>ルートを含む${chord.notes.length}音</span></span></div>
       <div class="instrument-panel">
-        <div class="instrument-heading"><span>${icon('keyboard')} 鍵盤で確認</span><span>タップして音を聴く</span></div>
+        <div class="instrument-heading"><span>${icon('keyboard')} 鍵盤で確認</span></div>
         ${keyboard(chord, 'main')}
         <div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span><span class="range-label">C3 — C5</span></div>
       </div>
       <div class="tone-heading"><h3>コードの構成音</h3><span>${chord.quality.formula.join(' · ')}</span></div>
       <div class="tone-list">${chord.notes.map(note => `<div class="tone-item ${note.isRoot ? 'is-root' : ''}"><span class="tone-degree">${note.isRoot ? 'ROOT' : `${note.degree} 度`}</span><strong>${note.name}</strong></div>`).join('')}</div>
-      <div class="audio-controls"><button type="button" class="button primary" data-action="play-chord" data-focus="play-chord">${icon('play')}<span>コードを聴く</span></button><button type="button" class="button secondary" data-action="arpeggio" data-focus="arpeggio">${icon('notes')}<span>1音ずつ聴く</span></button><span class="synth-note">合成ピアノ音</span></div>
+      <div class="audio-controls"><button type="button" class="button primary" data-action="play-chord" data-focus="play-chord">${icon('play')}<span>コードを聴く</span></button><button type="button" class="button secondary" data-action="arpeggio" data-focus="arpeggio">${icon('notes')}<span>1音ずつ聴く</span></button></div>
       <aside class="learning-note"><span class="note-icon">${icon('book')}</span><div><h3>このコードのこと</h3><p>${chord.quality.description}</p></div></aside>
       <button type="button" class="next-lesson" data-action="to-circle" data-focus="to-circle"><span>このルートへのⅡ–Ⅴ–Ⅰを見る</span>${icon('arrow')}</button>
     </section>
@@ -129,15 +128,14 @@ function circleWheel(progression) {
 
 function circleView() {
   const progression = selectedProgression();
-  return `<header class="page-heading"><div><p class="section-caption">CIRCLE OF FIFTHS</p><h1>つながりから、覚える。</h1><p class="page-description">外側はメジャー、内側はナチュラルマイナー。音を選んでスケールとⅡ–Ⅴ–Ⅰを確認。</p></div><span class="header-mark" aria-hidden="true">${icon('circle')}</span></header>
+  return `<header class="page-heading"><div><p class="section-caption">CIRCLE OF FIFTHS</p></div><span class="header-mark" aria-hidden="true">${icon('circle')}</span></header>
   <section class="circle-overview" aria-label="五度圏と解決先">
     <div class="wheel-panel">${circleWheel(progression)}<p class="wheel-caption">外側をタップ：メジャー ／ 内側をタップ：ナチュラルマイナー</p><p class="wheel-caption">同じ方向に並ぶ長調と短調は、同じ調号を使う平行調です。</p></div>
-    <div class="resolution-panel"><div class="panel-title"><h2>解決先を選ぶ</h2><span>DESTINATION</span></div>
+    <div class="resolution-panel"><div class="panel-title"><h2>解決先を選ぶ</h2></div>
       <div class="mode-switch" role="group" aria-label="解決先の調性"><button type="button" data-action="mode" data-value="major" data-focus="mode-major" aria-pressed="${state.mode === 'major'}">メジャー</button><button type="button" data-action="mode" data-value="minor" data-focus="mode-minor" aria-pressed="${state.mode === 'minor'}">マイナー</button></div>
       <h2 class="destination-title">${state.tonic}<span> ${state.mode === 'major' ? 'major' : 'minor'}</span></h2>
       <p class="destination-description">${state.mode === 'major' ? 'Ⅱm7 → Ⅴ7 → Ⅰmaj7' : 'Ⅱm7♭5 → Ⅴ7 → Ⅰm(maj7)'}</p>
       <p class="voicing-caption">ルート入り4音 · ${state.voicing === 'root' ? '基本形' : '転回形でつなぐ'}</p>
-      <p class="resolution-copy">準備から緊張へ、そして解決へ。<br />3つの響きの移り変わりを聴いてみよう。</p>
       <button type="button" class="button primary" data-action="play-progression" data-focus="play-progression">${icon('play')}<span>Ⅱ–Ⅴ–Ⅰを聴く</span></button>
       <div class="fifths-tip"><span class="rotation-symbol" aria-hidden="true">↻</span><p><strong>時計回りに完全5度</strong><br />C → G → D … と、7半音ずつ進みます。Ⅱ → Ⅴ → Ⅰは、五度圏を反時計回りに2つ戻る動きです。</p></div>
       ${state.mode === 'minor' ? '<p class="minor-explainer">マイナーのⅡ–Ⅴ–Ⅰは、解決感を作るためⅤ7とⅠm(maj7)に導音（上げた第7音）を使います。下のナチュラルマイナースケールとは第7音が異なります。</p>' : '<p class="enharmonic-note">G♭とF♯は、同じ鍵盤で鳴る異名同音です。</p>'}
@@ -154,18 +152,18 @@ function circleView() {
 function scaleSection() {
   const scale = getScale(state.tonic, state.mode);
   return `<section class="scale-section" aria-label="${scale.root}${scale.name}"><div class="scale-heading"><div><h2><span>${scale.root}</span> ${scale.name}</h2><p>${state.mode === 'major' ? '外側の音をルートにした、1オクターブのメジャースケール。' : '内側の音をルートにした、1オクターブのナチュラルマイナースケール。'}</p></div><button type="button" class="button secondary" data-action="play-scale" data-focus="play-scale">${icon('notes')}<span>スケールを聴く</span></button></div>
-    <div class="scale-layout"><div class="instrument-panel"><div class="instrument-heading"><span>${icon('keyboard')} スケールの鍵盤</span><span>タップして音を聴く</span></div>${keyboard(scale, 'scale')}<div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span><span class="range-label">C3 — C5</span></div></div><div class="scale-details"><h3>スケールの構成音</h3><div class="scale-tones">${scale.notes.map(note => `<div class="scale-tone ${note.isRoot ? 'is-root' : ''}"><span>${note.degree}</span><strong>${note.name}</strong></div>`).join('')}</div><div class="scale-steps"><span>音の間隔</span><strong>${scale.steps.join(' · ')}</strong><p>全＝全音（2半音）／ 半＝半音</p></div>${state.mode === 'minor' ? '<p class="scale-note">第7音を上げずに弾くのがナチュラルマイナーです。</p>' : '<p class="scale-note">半音になるのは3–4度と7–8度の間。それ以外は全音です。</p>'}</div></div></section>`;
+    <div class="scale-layout"><div class="instrument-panel"><div class="instrument-heading"><span>${icon('keyboard')} スケールの鍵盤</span></div>${keyboard(scale, 'scale')}<div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span><span class="range-label">C3 — C5</span></div></div><div class="scale-details"><h3>スケールの構成音</h3><div class="scale-tones">${scale.notes.map(note => `<div class="scale-tone ${note.isRoot ? 'is-root' : ''}"><span>${note.degree}</span><strong>${note.name}</strong></div>`).join('')}</div><div class="scale-steps"><span>音の間隔</span><strong>${scale.steps.join(' · ')}</strong><p>全＝全音（2半音）／ 半＝半音</p></div>${state.mode === 'minor' ? '<p class="scale-note">第7音を上げずに弾くのがナチュラルマイナーです。</p>' : '<p class="scale-note">半音になるのは3–4度と7–8度の間。それ以外は全音です。</p>'}</div></div></section>`;
 }
 
 function render() {
   const focusKey = document.activeElement?.dataset.focus;
   const staffScroll = [...app.querySelectorAll('.staff-scroll')].map(element => element.scrollLeft);
   app.innerHTML = `<div class="app-shell">
-    <aside class="sidebar"><a class="brand" href="#chords" data-action="home" aria-label="voicing. コード一覧へ"><span class="brand-icon">${icon('keyboard')}</span><span>voicing<span class="brand-period">.</span></span></a><p class="brand-caption">JAZZ PIANO PRACTICE</p>
+    <aside class="sidebar"><a class="brand" href="#chords" data-action="home" aria-label="voicing. コード一覧へ"><span class="brand-icon">${icon('keyboard')}</span><span>voicing<span class="brand-period">.</span></span></a>
       <nav class="main-nav" aria-label="練習メニュー"><button type="button" data-action="view" data-value="chords" data-focus="nav-chords" ${state.view === 'chords' ? 'aria-current="page"' : ''}>${icon('keyboard')}<span>コードを覚える</span></button><button type="button" data-action="view" data-value="circle" data-focus="nav-circle" ${state.view === 'circle' ? 'aria-current="page"' : ''}>${icon('circle')}<span>五度圏とⅡ–Ⅴ–Ⅰ</span></button><button type="button" data-action="view" data-value="reading" data-focus="nav-reading" ${state.view === 'reading' ? 'aria-current="page"' : ''}>${icon('book')}<span>楽譜の読み方</span></button></nav>
       <div class="sidebar-bottom"><div class="small-keys" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><p>ひとつずつ、<br />音を自分のものに。</p></div>
     </aside>
-    <div class="main-shell"><main id="main" tabindex="-1">${state.view === 'chords' ? chordLibrary() : state.view === 'circle' ? circleView() : readingView(state.reading, { keyboard, icon })}</main><footer class="page-footer"><span>voicing. <span>小さな練習を、毎日の音楽に。</span></span><span>12 KEYS, ENDLESS POSSIBILITIES.</span></footer></div>
+    <div class="main-shell"><main id="main" tabindex="-1">${state.view === 'chords' ? chordLibrary() : state.view === 'circle' ? circleView() : readingView(state.reading, { keyboard, icon })}</main></div>
   </div>`;
   if (focusKey) [...app.querySelectorAll('[data-focus]')].find(element => element.dataset.focus === focusKey)?.focus({ preventScroll: true });
   app.querySelectorAll('.staff-scroll').forEach((element, index) => { element.scrollLeft = staffScroll[index] ?? 0; });
