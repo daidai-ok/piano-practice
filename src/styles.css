@@ -173,17 +173,11 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .scale-tone > span { font-size: 9px; color: var(--color-muted); }
 .scale-tone > strong { font: 500 21px var(--font-display); }
 .scale-tone.is-root { color: var(--color-accent); border-color: var(--color-accent); }
-.scale-steps { display: grid; gap: 12px; margin-top: 24px; }
-.scale-steps > span { font-size: 11px; font-weight: 600; }
-.scale-steps strong { font-size: 11px; font-weight: 400; letter-spacing: 2px; }
-.scale-steps p, .scale-note { font-size: 10px; color: var(--color-muted); line-height: 1.9; }
-.scale-note { margin-top: 20px; }
 .progression-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .progression-heading h2 { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .sequence-title { font: 500 24px var(--font-display); }
 .sequence-title i { font: 400 13px var(--font-body); font-style: normal; color: var(--color-muted); margin: 0 4px; }
 .sequence-subtitle { font-size: 11px; font-weight: 400; color: var(--color-muted); }
-.progression-heading > span { font-size: 9px; color: var(--color-muted); }
 .progression-grid { display: grid; gap: 16px; }
 .progression-card { min-width: 0; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 6px; padding: 16px; }
 .progression-card.is-playing { outline: 3px solid var(--color-accent); outline-offset: 2px; background: var(--color-active); }
@@ -221,6 +215,13 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   html:has(.mobile-quality) { scroll-padding-bottom: calc(111px + env(safe-area-inset-bottom, 0px)); }
   .app-shell:has(.mobile-quality) { padding-bottom: calc(95px + env(safe-area-inset-bottom, 0px)); }
   body:has(.mobile-quality) .audio-error { bottom: calc(111px + env(safe-area-inset-bottom, 0px)); }
+  .resolution-controls { position: fixed; z-index: 5; right: 0; bottom: 0; left: 0; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--color-paper); border-top: 1px solid var(--color-line-strong); }
+  .resolution-controls .mode-switch { display: flex; }
+  .resolution-controls .mode-switch button { flex: 1; min-height: 44px; font-size: 12px; }
+  /* Reserve the fixed switch's 79px height plus the home indicator area. */
+  html:has(.resolution-controls) { scroll-padding-bottom: calc(95px + env(safe-area-inset-bottom, 0px)); }
+  .app-shell:has(.resolution-controls) { padding-bottom: calc(79px + env(safe-area-inset-bottom, 0px)); }
+  body:has(.resolution-controls) .audio-error { bottom: calc(95px + env(safe-area-inset-bottom, 0px)); }
 }
 
 @media (min-width: 38rem) {
@@ -271,7 +272,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .scale-tones { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .scale-tone { padding: 8px 0; gap: 4px; }
   .scale-tone > strong { font-size: 20px; }
-  .scale-steps { margin-top: 16px; gap: 8px; }
   .resolution-panel { max-width: 340px; align-self: center; }
   .audio-error { left: auto; max-width: 420px; }
 }
@@ -298,7 +298,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 
 .key-practice { padding: 12px 0; border-top: 1px solid var(--color-line); }
 .key-practice > p { font-size: 10px; font-weight: 600; }
-.key-practice > p > span { color: var(--color-muted); font-size: 8px; font-weight: 400; margin-left: 8px; }
 .key-practice > div { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
 .key-practice button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; border: 1px solid var(--color-line-strong); border-radius: 4px; background: var(--color-surface); min-height: 40px; padding: 8px 12px; font-size: 10px; }
 .key-practice button:last-child { color: var(--color-accent); }
@@ -316,8 +315,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .voicing-heading h3 { font-size: 12px; font-weight: 600; }
 .voicing-heading .mode-switch button { padding-inline: 12px; }
 .voicing-panel p { margin-top: 16px; font-size: 11px; line-height: 1.9; color: var(--color-muted); }
-.voicing-note { display: block; margin-top: 8px; font-size: 10px; line-height: 1.9; color: var(--color-muted); }
-.voicing-caption { margin-top: 8px; color: var(--color-muted); font-size: 9px; }
 
 /* Reading lesson: the existing Studio palette with functional staff notation. */
 @font-face { font-family: 'Bravura'; src: url('./fonts/Bravura.woff') format('woff'); font-style: normal; font-weight: 400; font-display: block; }
