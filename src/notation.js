@@ -10,7 +10,6 @@ export const CLEFS = [
     lines: 'ミ・ソ・シ・レ・ファ', spaces: 'ファ・ラ・ド・ミ' },
   { id: 'bass', name: 'ヘ音記号', glyph: '\uE062', bottomMidi: 43, start: 40, end: 60,
     keyboardStart: 36, keyboardEnd: 60, referenceMidi: 53, referenceStep: 6,
-    description: '低い音域を読む記号。2つの点の間、上から2本目の線が「ファ（F3）」です。',
     lines: 'ソ・シ・レ・ファ・ラ', spaces: 'ラ・ド・ミ・ソ' },
 ];
 

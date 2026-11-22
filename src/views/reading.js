@@ -1,4 +1,5 @@
-import { CLEFS, staffNotes, staffNote } from './notation.js';
+import { CLEFS, staffNotes, staffNote } from '../notation.js';
+import { icon, renderKeyboard } from './shared.js';
 
 function staff(clef, selectedMidi) {
   const notes = staffNotes(clef.id);
@@ -28,16 +29,16 @@ function staff(clef, selectedMidi) {
   </div></div>`;
 }
 
-export function readingView(selected, { keyboard, icon }) {
+export function renderReadingView(selected) {
   return `<div class="reading-intro"><p>五線は<strong>下から第1線〜第5線</strong>。</p><button type="button" class="button secondary" data-action="reading-middle" data-focus="reading-middle">中央ドを両方で見る ${icon('arrow')}</button></div>
     <div class="reading-clefs">${CLEFS.map(clef => {
       const note = staffNote(selected[clef.id], clef.id);
       return `<section class="reading-clef" aria-labelledby="${clef.id}-title">
-        <div class="reading-clef-heading"><div><h2 id="${clef.id}-title">${clef.name}</h2>${clef.description ? `<p>${clef.description}</p>` : ''}</div><div class="reading-selection"><span>選択中の音</span><strong>${note.syllable} <small>${note.label}</small></strong><span>${note.middleC ? '中央ド · ' : ''}${note.position}</span></div></div>
+        <div class="reading-clef-heading"><h2 id="${clef.id}-title">${clef.name}</h2><div class="reading-selection"><span>選択中の音</span><strong>${note.syllable} <small>${note.label}</small></strong></div></div>
         ${staff(clef, note.midi)}
-        <div class="reading-memory"><p><span>線の上</span>${clef.lines}</p><p><span>線の間</span>${clef.spaces}</p><span>どちらも下から読む</span></div>
+        <div class="reading-memory"><p><span>線の上</span>${clef.lines}</p><p><span>線の間</span>${clef.spaces}</p></div>
         <div class="instrument-panel reading-instrument"><div class="instrument-heading"><span>${icon('keyboard')} ${note.syllable}（${note.label}）の鍵盤</span></div>
-          ${keyboard({ symbol: `${clef.name} ${note.syllable} ${note.label}`, notes: [{ ...note, isRoot: true }] }, `reading-${clef.id}`, false, { start: clef.keyboardStart, end: clef.keyboardEnd, reading: true, clef: clef.id })}
+          ${renderKeyboard({ symbol: `${clef.name} ${note.syllable} ${note.label}`, notes: [{ ...note, isRoot: true }] }, `reading-${clef.id}`, false, { start: clef.keyboardStart, end: clef.keyboardEnd, reading: true, clef: clef.id })}
         </div>
       </section>`;
     }).join('')}</div>`;

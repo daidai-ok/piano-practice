@@ -19,6 +19,8 @@ export const SCALE_TYPES = [
 export const QUALITIES = [
   { id: 'major', symbol: '', name: 'メジャー', group: 'triad', intervals: [0, 4, 7], degrees: [1, 3, 5], formula: ['1', '3', '5'], description: 'ルートに長3度と完全5度を重ねた、明るく安定した響き。まず覚えたい基本の3和音です。' },
   { id: 'minor', symbol: 'm', name: 'マイナー', group: 'triad', intervals: [0, 3, 7], degrees: [1, 3, 5], formula: ['1', '♭3', '5'], description: 'メジャーの3度を半音下げた3和音。3度が変わると、響きの表情が変わります。' },
+  { id: 'sus2', symbol: 'sus2', name: 'サスペンデッド2', group: 'triad', intervals: [0, 2, 7], degrees: [1, 2, 5], formula: ['1', '2', '5'], description: '3度の代わりに2度を使ったコード。3度を含まず、明るさや暗さを決めない開放的な響きです。' },
+  { id: 'sus4', symbol: 'sus4', name: 'サスペンデッド4', group: 'triad', intervals: [0, 5, 7], degrees: [1, 4, 5], formula: ['1', '4', '5'], description: '3度の代わりに4度を使ったコード。3度を含まず、解決を待つような開放的な響きです。' },
   { id: 'dim', symbol: 'dim', name: 'ディミニッシュ', group: 'triad', intervals: [0, 3, 6], degrees: [1, 3, 5], formula: ['1', '♭3', '♭5'], description: '短3度を2つ積み重ねた3和音。5度も半音下がり、不安定で緊張感のある響きになります。' },
   { id: 'aug', symbol: 'aug', name: 'オーギュメント', group: 'triad', intervals: [0, 4, 8], degrees: [1, 3, 5], formula: ['1', '3', '♯5'], description: 'メジャーの5度を半音上げた3和音。長3度が重なり、浮遊感のある響きになります。' },
   { id: 'maj7', symbol: 'maj7', name: 'メジャーセブンス', group: 'seventh', intervals: [0, 4, 7, 11], degrees: [1, 3, 5, 7], formula: ['1', '3', '5', '7'], description: 'メジャーコードに長7度を加えた、やわらかく広がる響き。メジャーのⅡ–Ⅴ–Ⅰでは、着地点のⅠに使います。' },
@@ -123,73 +125,74 @@ export function getVoicedProgression(root, mode = 'major', voicing = 'root') {
   return best;
 }
 
+const SCALE_DEFINITIONS = {
+  major: {
+    name: 'メジャースケール', symbol: 'major',
+    intervals: [0, 2, 4, 5, 7, 9, 11, 12],
+    degrees: ['1', '2', '3', '4', '5', '6', '7', '8'],
+    spellings: [1, 2, 3, 4, 5, 6, 7, 8],
+    steps: ['全', '全', '半', '全', '全', '全', '半'],
+  },
+  minor: {
+    name: 'ナチュラルマイナースケール', symbol: 'natural minor',
+    intervals: [0, 2, 3, 5, 7, 8, 10, 12],
+    degrees: ['1', '2', '♭3', '4', '5', '♭6', '♭7', '8'],
+    spellings: [1, 2, 3, 4, 5, 6, 7, 8],
+    steps: ['全', '半', '全', '全', '半', '全', '全'],
+  },
+  melodicMinor: {
+    name: 'メロディックマイナースケール', symbol: 'melodic minor',
+    intervals: [0, 2, 3, 5, 7, 9, 11, 12],
+    degrees: ['1', '2', '♭3', '4', '5', '6', '7', '8'],
+    spellings: [1, 2, 3, 4, 5, 6, 7, 8],
+    steps: ['全', '半', '全', '全', '全', '全', '半'],
+  },
+  majorPentatonic: {
+    name: 'メジャーペンタトニックスケール', symbol: 'major pentatonic',
+    intervals: [0, 2, 4, 7, 9, 12],
+    degrees: ['1', '2', '3', '5', '6', '8'],
+    spellings: [1, 2, 3, 5, 6, 8],
+    steps: ['全', '全', '短3', '全', '短3'],
+  },
+  minorPentatonic: {
+    name: 'マイナーペンタトニックスケール', symbol: 'minor pentatonic',
+    intervals: [0, 3, 5, 7, 10, 12],
+    degrees: ['1', '♭3', '4', '5', '♭7', '8'],
+    spellings: [1, 3, 4, 5, 7, 8],
+    steps: ['短3', '全', '全', '短3', '全'],
+  },
+  blues: {
+    name: 'ブルーススケール', symbol: 'blues',
+    intervals: [0, 3, 5, 6, 7, 10, 12],
+    degrees: ['1', '♭3', '4', '♭5', '5', '♭7', '8'],
+    spellings: [1, 3, 4, 5, 5, 7, 8],
+    steps: ['短3', '全', '半', '半', '短3', '全'],
+  },
+  diminishedWholeHalf: {
+    name: 'ディミニッシュスケール（全音・半音）', symbol: 'whole-half diminished',
+    intervals: [0, 2, 3, 5, 6, 8, 9, 11, 12],
+    degrees: ['1', '2', '♭3', '4', '♭5', '♭6', '6', '7', '8'],
+    spellings: [1, 2, 3, 4, 5, 6, 6, 7, 8],
+    steps: ['全', '半', '全', '半', '全', '半', '全', '半'],
+  },
+  diminishedHalfWhole: {
+    name: 'ディミニッシュスケール（半音・全音）', symbol: 'half-whole diminished',
+    intervals: [0, 1, 3, 4, 6, 7, 9, 10, 12],
+    degrees: ['1', '♭2', '♭3', '3', '♭5', '5', '6', '♭7', '8'],
+    spellings: [1, 2, 3, 3, 5, 5, 6, 7, 8],
+    steps: ['半', '全', '半', '全', '半', '全', '半', '全'],
+  },
+};
+
 export function getScale(root, mode = 'major', octave = 3) {
-  const definitions = {
-    major: {
-      name: 'メジャースケール', symbol: 'major',
-      intervals: [0, 2, 4, 5, 7, 9, 11, 12],
-      degrees: ['1', '2', '3', '4', '5', '6', '7', '8'],
-      spellings: [1, 2, 3, 4, 5, 6, 7, 8],
-      steps: ['全', '全', '半', '全', '全', '全', '半'],
-    },
-    minor: {
-      name: 'ナチュラルマイナースケール', symbol: 'natural minor',
-      intervals: [0, 2, 3, 5, 7, 8, 10, 12],
-      degrees: ['1', '2', '♭3', '4', '5', '♭6', '♭7', '8'],
-      spellings: [1, 2, 3, 4, 5, 6, 7, 8],
-      steps: ['全', '半', '全', '全', '半', '全', '全'],
-    },
-    melodicMinor: {
-      name: 'メロディックマイナースケール', symbol: 'melodic minor',
-      intervals: [0, 2, 3, 5, 7, 9, 11, 12],
-      degrees: ['1', '2', '♭3', '4', '5', '6', '7', '8'],
-      spellings: [1, 2, 3, 4, 5, 6, 7, 8],
-      steps: ['全', '半', '全', '全', '全', '全', '半'],
-    },
-    majorPentatonic: {
-      name: 'メジャーペンタトニックスケール', symbol: 'major pentatonic',
-      intervals: [0, 2, 4, 7, 9, 12],
-      degrees: ['1', '2', '3', '5', '6', '8'],
-      spellings: [1, 2, 3, 5, 6, 8],
-      steps: ['全', '全', '短3', '全', '短3'],
-    },
-    minorPentatonic: {
-      name: 'マイナーペンタトニックスケール', symbol: 'minor pentatonic',
-      intervals: [0, 3, 5, 7, 10, 12],
-      degrees: ['1', '♭3', '4', '5', '♭7', '8'],
-      spellings: [1, 3, 4, 5, 7, 8],
-      steps: ['短3', '全', '全', '短3', '全'],
-    },
-    blues: {
-      name: 'ブルーススケール', symbol: 'blues',
-      intervals: [0, 3, 5, 6, 7, 10, 12],
-      degrees: ['1', '♭3', '4', '♭5', '5', '♭7', '8'],
-      spellings: [1, 3, 4, 5, 5, 7, 8],
-      steps: ['短3', '全', '半', '半', '短3', '全'],
-    },
-    diminishedWholeHalf: {
-      name: 'ディミニッシュスケール（全音・半音）', symbol: 'whole-half diminished',
-      intervals: [0, 2, 3, 5, 6, 8, 9, 11, 12],
-      degrees: ['1', '2', '♭3', '4', '♭5', '♭6', '6', '7', '8'],
-      spellings: [1, 2, 3, 4, 5, 6, 6, 7, 8],
-      steps: ['全', '半', '全', '半', '全', '半', '全', '半'],
-    },
-    diminishedHalfWhole: {
-      name: 'ディミニッシュスケール（半音・全音）', symbol: 'half-whole diminished',
-      intervals: [0, 1, 3, 4, 6, 7, 9, 10, 12],
-      degrees: ['1', '♭2', '♭3', '3', '♭5', '5', '6', '♭7', '8'],
-      spellings: [1, 2, 3, 3, 5, 5, 6, 7, 8],
-      steps: ['半', '全', '半', '全', '半', '全', '半', '全'],
-    },
-  };
-  const scale = definitions[mode];
+  const scale = SCALE_DEFINITIONS[mode];
   if (!scale) throw new Error(`Unknown mode: ${mode}`);
   const rootMidi = 12 * (octave + 1) + pitchClass(root);
   return {
     root, mode,
     symbol: `${root} ${scale.symbol}`,
     name: scale.name,
-    steps: scale.steps,
+    steps: [...scale.steps],
     notes: scale.intervals.map((interval, index) => ({
       name: spellInterval(root, interval, scale.spellings[index]),
       midi: rootMidi + interval,

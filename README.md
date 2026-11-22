@@ -16,7 +16,7 @@ npm run dev
 
 - **当面の練習目標**：maj7・m7・7の3種類を全12キー（計36コード）で覚え、全12キーのⅡ–Ⅴ–Ⅰを**ルート入りの4音**（ルート・3度・5度・7度）のヴォイシングで弾けるようになること。コード一覧ではこの3種類を優先表示します。
 - **12キーの反復**：Ⅱ–Ⅴ–Ⅰにキー送りを用意。C → F → B♭ → E♭ → A♭ → D♭ → G♭ → B → E → A → D → G → C の順で練習できます。マイナーでは内側の五度圏の音名を使います。
-- **コード一覧**：12音のルート × 10種類のコード。メジャー、マイナー、dim、aug、maj7、m7、7、m7♭5、dim7、m(maj7)。
+- **コード一覧**：12音のルート × 12種類のコード。メジャー、マイナー、sus2、sus4、dim、aug、maj7、m7、7、m7♭5、dim7、m(maj7)。
 - **鍵盤表示**：C3〜C5の鍵盤上に基本形を表示。濃い緑がルート、薄い緑がその他の構成音。鍵盤をタップすると単音を再生できます。
 - **構成音と試聴**：音名と度数、コードの説明、和音／アルペジオ再生。
 - **五度圏**：外側はメジャーキーと調号、内側は対応する平行短調。時計回りに完全5度上昇します。外側・内側のどちらも選べます。
@@ -112,32 +112,34 @@ npx wrangler deploy --dry-run --secrets-file .dev.vars
 
 ## アプリケーション構成
 
-フロントエンドはフレームワークやバンドラーを使わない、ブラウザ標準のJavaScript ESモジュールです。`index.html` が画面の土台を用意し、`src/app.js` が選択状態に応じて画面を描画します。画面は `/chords`・`/circle`・`/scales`・`/reading` の各パスで切り替わり、ブラウザ内の History API で遷移します。選択状態は `localStorage` の `voicing-settings` に保存します。アプリのデータ処理と音声合成はブラウザ内で完結し、アプリ用のバックエンドAPIはありません。
+フロントエンドはフレームワークやバンドラーを使わない、ブラウザ標準のJavaScript ESモジュールです。`index.html` が画面の土台を用意し、`src/app.js` が状態・画面・操作をつなぎます。画面テンプレートは `src/views/`、選択状態の初期化・更新・保存は `src/app-state.js`、共有ルートは `src/routes.js` に分けています。画面は `/chords`・`/circle`・`/scales`・`/reading` の各パスで切り替わり、ブラウザ内の History API で遷移します。選択状態は `localStorage` の `voicing-settings` に保存します。アプリのデータ処理と音声合成はブラウザ内で完結し、アプリ用のバックエンドAPIはありません。
 
 | 用途 | 設定・動作 |
 | --- | --- |
 | 実行環境 | Node.js 22以上。通常の開発・ビルド・実行に必要な外部パッケージはありません。 |
 | 開発サーバー | `npm run dev` は Node.js 標準のHTTPサーバーでソースを配信します。`127.0.0.1` のみで待ち受け、標準ポートは5173です。 |
 | ビルド／プレビュー | `npm run build` は `dist/` を作り直し、HTML・アイコン・`src/` をコピーします。バンドルや変換処理は行いません。`npm run preview` は `dist/` を同じローカルサーバーで配信します。 |
-| Cloudflare設定 | `wrangler.jsonc` は `worker/index.js` をWorkerの入口、`./dist` をStatic Assetsの配置先として指定します。`run_worker_first` により全リクエストを先にWorkerへ通し、ページだけでなくJavaScript・CSS・画像も認証後に配信します。 |
+| Cloudflare設定 | `wrangler.jsonc` は `worker/index.js` をWorkerの入口、`./dist` をStatic Assetsの配置先として指定します。`run_worker_first` により全リクエストを先にWorkerへ通し、ページだけでなくJavaScript・CSS・画像も認証後に配信します。ブラウザ・ローカルサーバー・Workerで使う画面パスは `src/routes.js` にまとめています。 |
 | Cloudflareの認証設定 | ユーザー名 `root` は `wrangler.jsonc` の変数です。`BASIC_AUTH_PASSWORD` はWorkerのSecretとして実行時に設定し、ソースやビルド成果物には含めません。値が未設定または空の場合、Workerは503を返して配信を停止します。 |
 
 画面・理論計算・音声・譜読みの実装ファイルは次のとおりです。
 
 ```text
-src/theory.js     コード、音名、五度圏、Ⅱ–Ⅴ–Ⅰ、スケールの純粋関数
-src/audio.js      Web Audioによる発音と再生制御
-src/app.js        画面・鍵盤・五度圏・操作
-src/tokens.css    色とフォントのトークン
-src/styles.css    レスポンシブレイアウト
-src/notation.js   音符の高さ・加線・鍵盤位置の対応
-src/reading.js    ト音記号・ヘ音記号の読譜画面
-src/fonts/       Bravura楽譜フォントとOFLライセンス
-worker/index.js   CloudflareでのBASIC認証・静的ファイル配信
-wrangler.jsonc    Cloudflare Workersの公開設定
-Makefile          ビルド・手動デプロイ（make deploy）
-tests/            音楽理論・音声制御・認証の自動テスト
-scripts/          開発サーバー・静的ビルド
+src/theory.js       コード、音名、五度圏、Ⅱ–Ⅴ–Ⅰ、スケールの純粋関数
+src/app-state.js    選択状態の初期化・更新・保存
+src/routes.js       ブラウザ・開発サーバー・Workerで共有する画面パス
+src/audio.js        Web Audioによる発音と再生制御
+src/views/          コード・五度圏・スケール・読譜の画面テンプレートと共通表示ヘルパー
+src/app.js          描画・状態・画面遷移・音声を結ぶアプリ制御
+src/tokens.css      色とフォントのトークン
+src/styles.css      レスポンシブレイアウト
+src/notation.js     音符の高さ・加線・鍵盤位置の対応
+src/fonts/          Bravura楽譜フォントとOFLライセンス
+worker/index.js     CloudflareでのBASIC認証・静的ファイル配信
+wrangler.jsonc      Cloudflare Workersの公開設定
+Makefile            ビルド・手動デプロイ（make deploy）
+tests/              音楽理論・音声制御・認証の自動テスト
+scripts/            開発サーバー・静的ビルド
 ```
 
 ## 音楽理論の参考資料

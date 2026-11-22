@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isAppPath } from '../src/routes.js';
 
 const project = fileURLToPath(new URL('../', import.meta.url));
 const root = await realpath(resolve(project, process.argv.includes('--dist') ? 'dist' : '.'));
@@ -14,7 +15,7 @@ const server = createServer(async (req, res) => {
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
     // Only expose public application assets and known app routes, never repository metadata or scripts.
-    const appRoute = ['/', '/index.html', '/chords', '/circle', '/scales', '/reading'].includes(pathname);
+    const appRoute = isAppPath(pathname);
     if (!(appRoute || pathname === '/favicon.svg' || pathname.startsWith('/src/'))) {
       res.writeHead(404); res.end('Not found'); return;
     }
