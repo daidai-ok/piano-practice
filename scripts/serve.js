@@ -13,11 +13,13 @@ const server = createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405); res.end(); return; }
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    // Only expose public application assets, never repository metadata or scripts.
-    if (!(pathname === '/' || pathname === '/index.html' || pathname === '/favicon.svg' || pathname.startsWith('/src/'))) {
+    // Only expose public application assets and known app routes, never repository metadata or scripts.
+    const appRoute = ['/', '/index.html', '/chords', '/circle', '/reading'].includes(pathname);
+    if (!(appRoute || pathname === '/favicon.svg' || pathname.startsWith('/src/'))) {
       res.writeHead(404); res.end('Not found'); return;
     }
-    const file = await realpath(resolve(root, '.' + (pathname === '/' ? '/index.html' : pathname)));
+    const filePath = appRoute ? '/index.html' : pathname;
+    const file = await realpath(resolve(root, '.' + filePath));
     const isPublic = file === resolve(root, 'index.html') || file === resolve(root, 'favicon.svg') || file.startsWith(resolve(root, 'src') + sep);
     if (!isPublic || !(await stat(file)).isFile()) { res.writeHead(404); res.end('Not found'); return; }
     const body = await readFile(file);

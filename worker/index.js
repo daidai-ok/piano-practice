@@ -2,6 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 
 const encoder = new TextEncoder();
 const challenge = 'Basic realm="voicing", charset="UTF-8"';
+const appRoutes = new Set(['/', '/index.html', '/chords', '/circle', '/reading']);
 
 function credentialsFrom(request) {
   const match = /^Basic +([A-Za-z0-9+/]+={0,2})$/i.exec(request.headers.get('Authorization') ?? '');
@@ -45,7 +46,9 @@ export default {
       return deny(request, 401, 'Authentication required.');
     }
 
-    const assetRequest = new Request(request);
+    const assetUrl = new URL(request.url);
+    if (appRoutes.has(assetUrl.pathname)) assetUrl.pathname = '/index.html';
+    const assetRequest = new Request(assetUrl, request);
     assetRequest.headers.delete('Authorization');
     const asset = await env.ASSETS.fetch(assetRequest);
     const response = new Response(asset.body, asset);

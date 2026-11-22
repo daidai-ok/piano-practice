@@ -27,8 +27,8 @@ svg { display: inline-block; width: 20px; height: 20px; flex-shrink: 0; vertical
 .brand-icon svg { width: 24px; height: 24px; }
 .brand-period { color: var(--color-accent); }
 .main-nav { display: flex; gap: 4px; margin-top: 24px; }
-.main-nav button { flex: 1; min-height: 48px; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 10px 8px; border-radius: 6px 6px 0 0; font-size: 12px; font-weight: 600; color: var(--color-muted); }
-.main-nav button:hover { background: var(--color-hover); color: var(--color-ink); }
+.main-nav a { flex: 1; min-height: 48px; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 10px 8px; border-radius: 6px 6px 0 0; font-size: 12px; font-weight: 600; color: var(--color-muted); text-decoration: none; }
+.main-nav a:hover { background: var(--color-hover); color: var(--color-ink); }
 .main-nav [aria-current] { color: var(--color-accent); background: var(--color-active); }
 .sidebar-bottom { display: none; }
 main { max-width: 1400px; margin: auto; padding: 28px 20px 40px; outline: none; }
@@ -145,7 +145,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .circle-center strong { font: 500 46px/1.2 var(--font-display); color: var(--color-accent); }
 .circle-center .center-mode { font-size: 8px; letter-spacing: 1.8px; margin-top: 4px; }
 .resolution-panel { min-width: 0; padding: 24px 0; border-top: 1px solid var(--color-line); }
-.resolution-panel > .panel-title { max-width: 300px; }
 .mode-switch { display: inline-flex; padding: 4px; gap: 4px; background: var(--color-instrument); border: 1px solid var(--color-line); border-radius: 6px; }
 .mode-switch button { padding: 9px 20px; min-height: 36px; font-size: 11px; border-radius: 4px; color: var(--color-muted); }
 .mode-switch button:hover { color: var(--color-ink); }
@@ -162,14 +161,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .scale-heading h2 { font-size: 16px; font-weight: 600; }
 .scale-heading h2 > span { font: 500 28px var(--font-display); margin-right: 4px; }
 .scale-heading p { margin-top: 8px; color: var(--color-muted); font-size: 10px; line-height: 1.9; }
-.scale-layout { display: grid; gap: 24px; }
-.scale-details { min-width: 0; }
-.scale-details h3 { font-size: 11px; font-weight: 600; margin-bottom: 16px; }
-.scale-tones { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 4px; }
-.scale-tone { display: flex; align-items: center; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 2px solid var(--color-line); }
-.scale-tone > span { font-size: 9px; color: var(--color-muted); }
-.scale-tone > strong { font: 500 21px var(--font-display); }
-.scale-tone.is-root { color: var(--color-accent); border-color: var(--color-accent); }
 .progression-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .progression-heading h2 { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .sequence-title { font: 500 24px var(--font-display); }
@@ -246,7 +237,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .sidebar { position: sticky; top: 0; height: 100dvh; padding: 36px 20px 24px; border-right: 1px solid var(--color-line); border-bottom: 0; display: flex; flex-direction: column; }
   .brand { padding-left: 4px; }
   .main-nav { flex-direction: column; gap: 8px; margin-top: 48px; }
-  .main-nav button { justify-content: flex-start; padding: 12px; gap: 10px; border-radius: 5px; font-size: 11px; }
+  .main-nav a { justify-content: flex-start; padding: 12px; gap: 10px; border-radius: 5px; font-size: 11px; }
   .main-nav svg { width: 18px; height: 18px; }
   .sidebar-bottom { display: block; margin-top: auto; padding: 32px 10px 4px; }
   .sidebar-bottom > span { display: block; font-size: 7px; letter-spacing: 1px; color: var(--color-muted); margin-top: 20px; }
@@ -260,11 +251,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .quality-name { font-size: 9px; }
   .quality-symbol { font-size: 19px; }
   .circle-overview { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; }
-  .scale-layout { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 28px; }
   .scale-section .piano { height: 168px; }
-  .scale-tones { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .scale-tone { padding: 8px 0; gap: 4px; }
-  .scale-tone > strong { font-size: 20px; }
   .resolution-panel { max-width: 340px; align-self: center; }
   .audio-error { left: auto; max-width: 420px; }
 }
@@ -290,8 +277,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } button:active, .piano-key.sounding { transform: none; } .circle-note:active, .relative-minor:active { transform: translate(-50%, -50%); } }
 
 .key-practice { padding: 12px 0; border-top: 1px solid var(--color-line); }
-.key-practice > p { font-size: 10px; font-weight: 600; }
-.key-practice > div { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; }
+.key-practice > div { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .key-practice button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; border: 1px solid var(--color-line-strong); border-radius: 4px; background: var(--color-surface); min-height: 40px; padding: 8px 12px; font-size: 10px; }
 .key-practice button:last-child { color: var(--color-accent); }
 .key-practice button:hover { background: var(--color-active); }
@@ -359,6 +345,6 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   .reading-instrument .key-label { font-size: 8px; }
 }
 @media (max-width: 37.99rem) {
-  .main-nav button { flex-direction: column; justify-content: center; gap: 6px; min-width: 0; font-size: 10px; padding: 10px 2px; }
+  .main-nav a { flex-direction: column; justify-content: center; gap: 6px; min-width: 0; font-size: 10px; padding: 10px 2px; }
   .main-nav svg { width: 18px; height: 18px; }
 }

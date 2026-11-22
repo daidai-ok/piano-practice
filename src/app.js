@@ -18,10 +18,12 @@ const icon = name => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const audio = new PianoAudio();
 const app = document.querySelector('#app');
+const viewPaths = { chords: '/chords', circle: '/circle', reading: '/reading' };
+const viewForPath = pathname => Object.entries(viewPaths).find(([, path]) => path === pathname)?.[0] ?? null;
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem('voicing-settings') || '{}') || {}; } catch { /* Storage is optional. */ }
 const state = {
-  view: ['circle', 'reading'].includes(saved.view) ? saved.view : 'chords',
+  view: viewForPath(window.location.pathname) ?? (['circle', 'reading'].includes(saved.view) ? saved.view : 'chords'),
   root: ROOT_SPELLINGS.flat().includes(saved.root) ? saved.root : 'C',
   quality: QUALITIES.some(item => item.id === saved.quality) ? saved.quality : 'maj7',
   tonic: ROOT_SPELLINGS.flat().includes(saved.tonic) ? saved.tonic : 'C',
@@ -35,6 +37,12 @@ state.tonic = circleTonic(state.tonic, state.mode);
 function persist() {
   const { playing, ...settings } = state;
   try { localStorage.setItem('voicing-settings', JSON.stringify(settings)); } catch { /* Private browsing can disable storage. */ }
+}
+
+function syncViewPath({ replace = false } = {}) {
+  const path = viewPaths[state.view] ?? viewPaths.chords;
+  if (window.location.pathname === path) return;
+  window.history[replace ? 'replaceState' : 'pushState']({ view: state.view }, '', path);
 }
 
 function keyboard(chord, id, compact = false, options = {}) {
@@ -69,7 +77,7 @@ function selectedProgression() {
 
 function keyPractice(root, target) {
   const next = practiceKey(root, 1, target === 'circle' ? state.mode : 'major');
-  return `<div class="key-practice"><p>12キー練習</p><div><button type="button" data-action="practice-key" data-target="${target}" data-value="-1" data-focus="${target}-previous-key" aria-label="前のキーへ">← 前のキー</button><button type="button" data-action="practice-key" data-target="${target}" data-value="1" data-focus="${target}-next-key" aria-label="次のキー ${next}へ">次：${next} ${icon('arrow')}</button></div></div>`;
+  return `<div class="key-practice"><div><button type="button" data-action="practice-key" data-target="${target}" data-value="-1" data-focus="${target}-previous-key" aria-label="前のキーへ">← 前のキー</button><button type="button" data-action="practice-key" data-target="${target}" data-value="1" data-focus="${target}-next-key" aria-label="次のキー ${next}へ">次：${next} ${icon('arrow')}</button></div></div>`;
 }
 
 function qualityChoices(qualities) {
@@ -126,7 +134,7 @@ function circleView() {
   const progression = selectedProgression();
   return `<section class="circle-overview" aria-label="五度圏と解決先">
     <div class="wheel-panel">${circleWheel(progression)}</div>
-    <div class="resolution-panel"><div class="panel-title"><h2>解決先を選ぶ</h2></div>
+    <div class="resolution-panel">
       <div class="resolution-controls"><div class="mode-switch" role="group" aria-label="解決先の調性"><button type="button" data-action="mode" data-value="major" data-focus="mode-major" aria-pressed="${state.mode === 'major'}">メジャー</button><button type="button" data-action="mode" data-value="minor" data-focus="mode-minor" aria-pressed="${state.mode === 'minor'}">マイナー</button></div></div>
       <div class="destination-heading"><h2 class="destination-title">${state.tonic}<span> ${state.mode === 'major' ? 'major' : 'minor'}</span></h2><button type="button" class="button primary destination-play" data-action="play-progression" data-focus="play-progression" aria-label="Ⅱ–Ⅴ–Ⅰを聴く">${icon('play')}</button></div>
       <p class="destination-description">${state.mode === 'major' ? 'Ⅱm7 → Ⅴ7 → Ⅰmaj7' : 'Ⅱm7♭5 → Ⅴ7 → Ⅰm(maj7)'}</p>
@@ -144,15 +152,15 @@ function circleView() {
 function scaleSection() {
   const scale = getScale(state.tonic, state.mode);
   return `<section class="scale-section" aria-label="${scale.root}${scale.name}"><div class="scale-heading"><div><h2><span>${scale.root}</span> ${scale.name}</h2>${state.mode === 'minor' ? '<p>内側の音をルートにした、1オクターブのナチュラルマイナースケール。</p>' : ''}</div><button type="button" class="button secondary" data-action="play-scale" data-focus="play-scale">${icon('notes')}<span>スケールを聴く</span></button></div>
-    <div class="scale-layout"><div class="instrument-panel"><div class="instrument-heading"><span>${icon('keyboard')} スケールの鍵盤</span></div>${keyboard(scale, 'scale')}<div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span><span class="range-label">C3 — C5</span></div></div><div class="scale-details"><h3>スケールの構成音</h3><div class="scale-tones">${scale.notes.map(note => `<div class="scale-tone ${note.isRoot ? 'is-root' : ''}"><span>${note.degree}</span><strong>${note.name}</strong></div>`).join('')}</div></div></div></section>`;
+    <div class="instrument-panel"><div class="instrument-heading"><span>${icon('keyboard')} スケールの鍵盤</span></div>${keyboard(scale, 'scale')}<div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span><span class="range-label">C3 — C5</span></div></div></section>`;
 }
 
 function render() {
   const focusKey = document.activeElement?.dataset.focus;
   const staffScroll = [...app.querySelectorAll('.staff-scroll')].map(element => element.scrollLeft);
   app.innerHTML = `<div class="app-shell">
-    <aside class="sidebar"><a class="brand" href="#chords" data-action="home" aria-label="voicing. コード一覧へ"><span class="brand-icon">${icon('keyboard')}</span><span>voicing<span class="brand-period">.</span></span></a>
-      <nav class="main-nav" aria-label="練習メニュー"><button type="button" data-action="view" data-value="chords" data-focus="nav-chords" ${state.view === 'chords' ? 'aria-current="page"' : ''}>${icon('keyboard')}<span>コードを覚える</span></button><button type="button" data-action="view" data-value="circle" data-focus="nav-circle" ${state.view === 'circle' ? 'aria-current="page"' : ''}>${icon('circle')}<span>五度圏とⅡ–Ⅴ–Ⅰ</span></button><button type="button" data-action="view" data-value="reading" data-focus="nav-reading" ${state.view === 'reading' ? 'aria-current="page"' : ''}>${icon('book')}<span>楽譜の読み方</span></button></nav>
+    <aside class="sidebar"><a class="brand" href="/chords" data-action="home" aria-label="voicing. コード一覧へ"><span class="brand-icon">${icon('keyboard')}</span><span>voicing<span class="brand-period">.</span></span></a>
+      <nav class="main-nav" aria-label="練習メニュー"><a href="/chords" data-action="view" data-value="chords" data-focus="nav-chords" ${state.view === 'chords' ? 'aria-current="page"' : ''}>${icon('keyboard')}<span>コードを覚える</span></a><a href="/circle" data-action="view" data-value="circle" data-focus="nav-circle" ${state.view === 'circle' ? 'aria-current="page"' : ''}>${icon('circle')}<span>五度圏とⅡ–Ⅴ–Ⅰ</span></a><a href="/reading" data-action="view" data-value="reading" data-focus="nav-reading" ${state.view === 'reading' ? 'aria-current="page"' : ''}>${icon('book')}<span>楽譜の読み方</span></a></nav>
       <div class="sidebar-bottom"><div class="small-keys" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
     </aside>
     <div class="main-shell"><main id="main" tabindex="-1">${state.view === 'chords' ? chordLibrary() : state.view === 'circle' ? circleView() : readingView(state.reading, { keyboard, icon })}</main></div>
@@ -214,6 +222,7 @@ app.addEventListener('click', async event => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const { action, value } = target.dataset;
+  if (['view', 'home'].includes(action) && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return;
   try {
     if (action === 'reading-note') {
       const { clef, midi } = target.dataset;
@@ -242,7 +251,7 @@ app.addEventListener('click', async event => {
       if (target.dataset.target === 'chords') state.root = practiceKey(state.root, Number(value));
       else state.tonic = practiceKey(state.tonic, Number(value), state.mode);
     }
-    if (action === 'view') state.view = value;
+    if (action === 'view') { event.preventDefault(); state.view = value; }
     if (action === 'reading-middle') { state.reading.treble = 60; state.reading.bass = 60; }
     if (action === 'home') { event.preventDefault(); state.view = 'chords'; }
     if (action === 'to-circle') { state.tonic = circleTonic(state.root, state.mode); state.view = 'circle'; }
@@ -253,6 +262,7 @@ app.addEventListener('click', async event => {
       state.view = 'chords';
     }
     render();
+    if (oldView !== state.view) syncViewPath();
     if (action === 'reading-middle') CLEFS.forEach(clef => revealStaffNote(clef.id));
     if (oldView !== state.view) { document.querySelector('#main').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' }); }
     if (action === 'voicing') announce(`ルート入りの4音、${state.voicing === 'root' ? '基本形' : '転回形でつなぐ'}。${selectedProgression().map(chord => `${chord.symbol} ${chord.positionName} ${chord.notes.map(note => note.name).join('、')}`).join('。')}`);
@@ -293,3 +303,14 @@ document.addEventListener('keydown', event => {
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) stopPlayback(); });
 render();
+syncViewPath({ replace: true });
+
+window.addEventListener('popstate', () => {
+  const view = viewForPath(window.location.pathname);
+  if (!view || view === state.view) return;
+  stopPlayback();
+  state.view = view;
+  render();
+  document.querySelector('#main').focus({ preventScroll: true });
+  window.scrollTo({ top: 0, behavior: 'instant' });
+});
