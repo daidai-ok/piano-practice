@@ -182,6 +182,20 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .progression-grid { display: grid; gap: 16px; }
 .progression-card { min-width: 0; background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 6px; padding: 12px; }
 .progression-card.is-playing { outline: 3px solid var(--color-accent); outline-offset: 2px; background: var(--color-active); }
+.rootless-section { margin-top: 44px; padding-top: 24px; border-top: 1px solid var(--color-line); }
+.rootless-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; }
+.rootless-heading h2 { font-size: 16px; font-weight: 600; }
+.rootless-heading > div:first-child > p { margin-top: 6px; color: var(--color-muted); font-size: 10px; line-height: 1.8; }
+.rootless-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.rootless-controls .mode-switch button { padding-inline: 14px; }
+.rootless-controls .button { min-height: 40px; padding-inline: 12px; }
+.rootless-controls .button svg { width: 15px; height: 15px; }
+.rootless-explainer { max-width: 80ch; margin-bottom: 18px; color: var(--color-muted); font-size: 10px; line-height: 1.9; }
+.rootless-hands { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 10px 0 12px; }
+.rootless-hands p { min-width: 0; display: grid; gap: 4px; padding: 8px; border-radius: 4px; background: var(--color-instrument); }
+.rootless-hands span { color: var(--color-muted); font-size: 8px; }
+.rootless-hands strong { font: 500 14px var(--font-display); white-space: normal; overflow-wrap: anywhere; }
+.rootless-card .compact .piano { height: 72px; }
 .progression-card-top { display: flex; align-items: center; gap: 8px; }
 .roman-label { padding: 5px 8px; background: var(--color-active); color: var(--color-accent); border-radius: 3px; font: 500 12px var(--font-display); }
 .roman-label.degree-1 { background: var(--color-dominant-paper); color: var(--color-dominant); }
@@ -210,6 +224,9 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
   html:has(.mobile-quality) { scroll-padding-bottom: calc(111px + env(safe-area-inset-bottom, 0px)); }
   .app-shell:has(.mobile-quality) { padding-bottom: calc(95px + env(safe-area-inset-bottom, 0px)); }
   body:has(.mobile-quality) .app-error { bottom: calc(111px + env(safe-area-inset-bottom, 0px)); }
+  .chord-workbench { gap: 4px; }
+  .chord-detail { padding-top: 0; border-top: 0; }
+  .enharmonic-control:empty { display: none; }
   .resolution-controls { position: fixed; z-index: 5; right: 0; bottom: 0; left: 0; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--color-paper); border-top: 1px solid var(--color-line-strong); }
   .resolution-controls .mode-switch { display: flex; }
   .resolution-controls .mode-switch button { flex: 1; min-height: 44px; font-size: 12px; }

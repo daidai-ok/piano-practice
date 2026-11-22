@@ -19,16 +19,14 @@ export function renderChordLibrary(state) {
       <div class="quality-groups"><div class="quality-group"><div class="panel-title"><h2>まず覚える3つ</h2></div><div class="quality-list" role="group" aria-label="優先して練習するコード">${qualityChoices(state, focused)}</div></div><details class="other-chords" ${FOCUS_QUALITIES.includes(state.quality) ? '' : 'open'}><summary>その他のコード</summary><div class="quality-list" role="group" aria-label="その他のコード">${qualityChoices(state, remaining)}</div></details></div>
     </section>
     <section class="chord-detail" aria-label="選択したコード">
-      <div class="detail-heading"><div><span class="subtle-label">選択中のコード</span><h2 class="chord-display">${renderChordSymbol(chord)}</h2><p class="chord-name">${chord.quality.name}</p></div><span class="position-label">基本形</span></div>
+      <div class="detail-heading"><div><h2 class="chord-display">${renderChordSymbol(chord)}</h2><p class="chord-name">${chord.quality.name}</p></div></div>
       <div class="instrument-panel">
-        <div class="instrument-heading"><span>${icon('keyboard')} 鍵盤で確認</span></div>
         ${renderKeyboard(chord, 'main')}
         <div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span><span class="range-label">C3 — C5</span></div>
       </div>
       <div class="tone-heading"><h3>コードの構成音</h3><span>${chord.quality.formula.join(' · ')}</span></div>
       <div class="tone-list">${chord.notes.map(note => `<div class="tone-item ${note.isRoot ? 'is-root' : ''}"><span class="tone-degree">${note.isRoot ? 'ROOT' : `${note.degree} 度`}</span><strong>${note.name}</strong></div>`).join('')}</div>
       <div class="audio-controls"><button type="button" class="button primary" data-action="play-chord" data-focus="play-chord">${icon('play')}<span>コードを聴く</span></button><button type="button" class="button secondary" data-action="arpeggio" data-focus="arpeggio">${icon('notes')}<span>1音ずつ聴く</span></button></div>
-      <aside class="learning-note"><span class="note-icon">${icon('book')}</span><div><h3>このコードのこと</h3><p>${chord.quality.description}</p></div></aside>
       <button type="button" class="next-lesson" data-action="to-circle" data-focus="to-circle"><span>このルートへのⅡ–Ⅴ–Ⅰを見る</span>${icon('arrow')}</button>
     </section>
   </div>`;

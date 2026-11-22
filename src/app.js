@@ -1,4 +1,4 @@
-import { getChord, getVoicedProgression, getScale } from './theory.js';
+import { getChord, getRootlessProgression, getVoicedProgression, getScale } from './theory.js';
 import { PianoAudio } from './audio.js';
 import { CLEFS, staffNote } from './notation.js';
 import { renderReadingView } from './views/reading.js';
@@ -21,6 +21,10 @@ function syncViewPath({ replace = false } = {}) {
 
 function selectedProgression() {
   return getVoicedProgression(state.tonic, state.mode, state.voicing);
+}
+
+function selectedRootlessProgression() {
+  return getRootlessProgression(state.tonic, state.mode, state.rootlessType);
 }
 
 function render() {
@@ -58,14 +62,14 @@ function revealStaffNote(clef) {
 }
 
 function syncPlayback() {
-  const buttons = [['play-chord', 'コードを聴く'], ['arpeggio', '1音ずつ聴く'], ['play-progression', 'Ⅱ–Ⅴ–Ⅰを聴く'], ['play-scale', 'スケールを聴く']];
-  buttons.forEach(([action, label]) => {
+  const buttons = [['play-chord', 'コードを聴く'], ['arpeggio', '1音ずつ聴く'], ['play-progression', 'Ⅱ–Ⅴ–Ⅰを聴く'], ['play-rootless', '再生', 'ルートレスのⅡ–Ⅴ–Ⅰを聴く'], ['play-scale', 'スケールを聴く']];
+  buttons.forEach(([action, label, ariaLabel = label]) => {
     const button = app.querySelector(`[data-action="${action}"]`);
     if (!button) return;
     const text = state.playing === action ? '停止する' : label;
     const symbol = icon(state.playing === action ? 'stop' : ['arpeggio', 'play-scale'].includes(action) ? 'notes' : 'play');
     button.innerHTML = action === 'play-progression' ? symbol : `${symbol}<span>${text}</span>`;
-    if (action === 'play-progression') button.setAttribute('aria-label', text);
+    if (['play-progression', 'play-rootless'].includes(action)) button.setAttribute('aria-label', state.playing === action ? '停止する' : ariaLabel);
   });
 }
 
@@ -76,7 +80,7 @@ function stopPlayback() {
   syncPlayback();
 }
 
-async function play(chords, action, { arpeggio = false, stepIndex = null, midi = null } = {}) {
+async function play(chords, action, { arpeggio = false, stepIndex = null, rootlessStepIndex = null, midi = null } = {}) {
   if (state.playing === action && midi === null) { stopPlayback(); return; }
   stopPlayback();
   state.playing = action;
@@ -88,6 +92,7 @@ async function play(chords, action, { arpeggio = false, stepIndex = null, midi =
       onStep: index => {
         app.querySelectorAll('.is-playing').forEach(element => element.classList.remove('is-playing'));
         if (action === 'play-progression' || stepIndex !== null) app.querySelector(`[data-step="${stepIndex ?? index}"]`)?.classList.add('is-playing');
+        if (action === 'play-rootless' || rootlessStepIndex !== null) app.querySelector(`[data-rootless-step="${rootlessStepIndex ?? index}"]`)?.classList.add('is-playing');
         if (midi !== null) app.querySelectorAll(`[data-midi="${midi}"]`).forEach(element => element.classList.add('sounding'));
       },
       onEnd: () => { state.playing = null; app.querySelectorAll('.is-playing, .sounding').forEach(element => element.classList.remove('is-playing', 'sounding')); syncPlayback(); },
@@ -128,8 +133,10 @@ app.addEventListener('click', async event => {
     if (action === 'note') return await play([{ notes: [{ midi: Number(target.dataset.midi) }] }], 'note', { midi: Number(target.dataset.midi) });
     if (action === 'play-chord' || action === 'arpeggio') return await play([getChord(state.root, state.quality)], action, { arpeggio: action === 'arpeggio' });
     if (action === 'play-progression') return await play(selectedProgression(), action);
+    if (action === 'play-rootless') return await play(selectedRootlessProgression(), action);
     if (action === 'play-scale') return await play([getScale(state.scaleRoot, state.scaleType)], action, { arpeggio: true });
     if (action === 'play-step') return await play([selectedProgression()[Number(value)]], `step-${value}`, { stepIndex: Number(value) });
+    if (action === 'play-rootless-step') return await play([selectedRootlessProgression()[Number(value)]], `rootless-step-${value}`, { rootlessStepIndex: Number(value) });
     stopPlayback();
     const oldView = state.view;
     if (['view', 'home'].includes(action)) event.preventDefault();
@@ -140,6 +147,7 @@ app.addEventListener('click', async event => {
     if (action === 'reading-middle') CLEFS.forEach(clef => revealStaffNote(clef.id));
     if (oldView !== state.view) { document.querySelector('#main').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'instant' }); }
     if (action === 'voicing') announce(`ルート入りの4音、${state.voicing === 'root' ? '基本形' : '転回形でつなぐ'}。${selectedProgression().map(chord => `${chord.symbol} ${chord.positionName} ${chord.notes.map(note => note.name).join('、')}`).join('。')}`);
+    else if (action === 'rootless-type') announce(`ルートレスの${state.rootlessType}タイプ。左手 ${selectedRootlessProgression()[0].notes.slice(0, 2).map(note => note.name).join('、')}、右手 ${selectedRootlessProgression()[0].notes.slice(2).map(note => note.name).join('、')}`);
     else if (state.view === 'reading') announce(action === 'reading-middle' ? '中央ド C4。ト音記号の下の加線、ヘ音記号の上の加線。同じ鍵盤の音です。' : '楽譜の読み方。ト音記号とヘ音記号の音符を選ぶと、鍵盤で確認できます。');
     else if (state.view === 'scales') { const scale = getScale(state.scaleRoot, state.scaleType); announce(`${scale.root}${scale.name}、構成音 ${scale.notes.map(note => note.name).join('、')}`); }
     else if (state.view === 'chords') announce(`${getChord(state.root, state.quality).symbol}、構成音 ${getChord(state.root, state.quality).notes.map(note => note.name).join('、')}`);

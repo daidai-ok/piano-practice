@@ -21,6 +21,7 @@ export function createAppState(pathname, storage = undefined) {
     scaleType: SCALE_TYPES.some(scale => scale.id === saved.scaleType) ? saved.scaleType : 'major',
     mode: saved.mode === 'minor' ? 'minor' : 'major',
     voicing: saved.voicing === 'connected' ? 'connected' : 'root',
+    rootlessType: saved.rootlessType === 'B' ? 'B' : 'A',
     reading: Object.fromEntries(CLEFS.map(clef => [
       clef.id,
       staffNotes(clef.id).some(note => note.midi === saved.reading?.[clef.id])
@@ -53,6 +54,7 @@ export function transitionAppState(state, action, value, progression = []) {
     case 'scale-type': next.scaleType = value; break;
     case 'mode': next.mode = value; next.tonic = circleTonic(state.tonic, value); break;
     case 'voicing': next.voicing = value; break;
+    case 'rootless-type': next.rootlessType = value === 'B' ? 'B' : 'A'; break;
     case 'view': next.view = value; break;
     case 'reading-note':
       next.reading = { ...state.reading, [value.clef]: value.midi };

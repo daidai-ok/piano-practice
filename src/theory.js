@@ -125,6 +125,56 @@ export function getVoicedProgression(root, mode = 'major', voicing = 'root') {
   return best;
 }
 
+/** Two-hand rootless II–V–I: split a standard A/B four-note voicing across both hands. */
+export function getRootlessProgression(root, mode = 'major', type = 'A') {
+  if (!['A', 'B'].includes(type)) throw new Error(`Unknown rootless voicing type: ${type}`);
+  return getProgression(root, mode).map((chord, index) => {
+    // Add a 9th to the four chord tones. In minor, the dominant commonly uses b9.
+    const ninthInterval = mode === 'minor' && index === 1 ? 13 : 14;
+    const ninth = {
+      name: spellInterval(chord.root, ninthInterval, 9),
+      pitchClass: mod(pitchClass(chord.root) + ninthInterval),
+      degree: ninthInterval === 13 ? '♭9' : '9',
+      isRoot: false,
+    };
+    const thirteenth = {
+      name: spellInterval(chord.root, 21, 13),
+      pitchClass: mod(pitchClass(chord.root) + 21),
+      degree: '13',
+      isRoot: false,
+    };
+    // A/B names the full ii–V–I path: ii and I use the selected shape, V alternates.
+    const positionType = index === 1 ? (type === 'A' ? 'B' : 'A') : type;
+    const [, third, fifth, seventh] = chord.notes;
+    const alternateFifth = index === 1 && mode !== 'minor' ? thirteenth : fifth;
+    const ordered = positionType === 'A'
+      ? [third, alternateFifth, seventh, ninth]
+      : [seventh, ninth, third, alternateFifth];
+
+    // Keep both patterns in a comfortable middle register, starting at A2 or above.
+    let previousMidi = 44;
+    const notes = ordered.map((note, noteIndex) => {
+      let midi;
+      if (noteIndex === 0) {
+        midi = 45 + mod(note.pitchClass - mod(45));
+      } else {
+        const semitones = mod(note.pitchClass - mod(previousMidi));
+        midi = previousMidi + (semitones || 12);
+      }
+      previousMidi = midi;
+      return { ...note, midi, isRoot: false };
+    });
+    return {
+      ...chord,
+      notes,
+      inversion: positionType === 'A' ? 1 : 3,
+      positionName: `${positionType}タイプ`,
+      rootlessType: positionType,
+      progressionType: type,
+    };
+  });
+}
+
 const SCALE_DEFINITIONS = {
   major: {
     name: 'メジャースケール', symbol: 'major',
