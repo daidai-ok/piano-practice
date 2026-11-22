@@ -110,7 +110,19 @@ npx wrangler deploy --dry-run --secrets-file .dev.vars
 
 参考：[Workersのビルド設定](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)・[静的アセットの設定](https://developers.cloudflare.com/workers/static-assets/binding/)・[Secretの設定](https://developers.cloudflare.com/workers/configuration/secrets/)・[Workers BuildsのWorker名](https://developers.cloudflare.com/workers/ci-cd/builds/troubleshoot/#workers-name-requirement)
 
-## 構成
+## アプリケーション構成
+
+フロントエンドはフレームワークやバンドラーを使わない、ブラウザ標準のJavaScript ESモジュールです。`index.html` が画面の土台を用意し、`src/app.js` が選択状態に応じて画面を描画します。画面は `/chords`・`/circle`・`/scales`・`/reading` の各パスで切り替わり、ブラウザ内の History API で遷移します。選択状態は `localStorage` の `voicing-settings` に保存します。アプリのデータ処理と音声合成はブラウザ内で完結し、アプリ用のバックエンドAPIはありません。
+
+| 用途 | 設定・動作 |
+| --- | --- |
+| 実行環境 | Node.js 22以上。通常の開発・ビルド・実行に必要な外部パッケージはありません。 |
+| 開発サーバー | `npm run dev` は Node.js 標準のHTTPサーバーでソースを配信します。`127.0.0.1` のみで待ち受け、標準ポートは5173です。 |
+| ビルド／プレビュー | `npm run build` は `dist/` を作り直し、HTML・アイコン・`src/` をコピーします。バンドルや変換処理は行いません。`npm run preview` は `dist/` を同じローカルサーバーで配信します。 |
+| Cloudflare設定 | `wrangler.jsonc` は `worker/index.js` をWorkerの入口、`./dist` をStatic Assetsの配置先として指定します。`run_worker_first` により全リクエストを先にWorkerへ通し、ページだけでなくJavaScript・CSS・画像も認証後に配信します。 |
+| Cloudflareの認証設定 | ユーザー名 `root` は `wrangler.jsonc` の変数です。`BASIC_AUTH_PASSWORD` はWorkerのSecretとして実行時に設定し、ソースやビルド成果物には含めません。値が未設定または空の場合、Workerは503を返して配信を停止します。 |
+
+画面・理論計算・音声・譜読みの実装ファイルは次のとおりです。
 
 ```text
 src/theory.js     コード、音名、五度圏、Ⅱ–Ⅴ–Ⅰ、スケールの純粋関数
@@ -123,9 +135,9 @@ src/reading.js    ト音記号・ヘ音記号の読譜画面
 src/fonts/       Bravura楽譜フォントとOFLライセンス
 worker/index.js   CloudflareでのBASIC認証・静的ファイル配信
 wrangler.jsonc    Cloudflare Workersの公開設定
-Makefile         ビルド・手動デプロイ（make deploy）
-tests/           音楽理論・音声制御の自動テスト
-scripts/         開発サーバー・静的ビルド
+Makefile          ビルド・手動デプロイ（make deploy）
+tests/            音楽理論・音声制御・認証の自動テスト
+scripts/          開発サーバー・静的ビルド
 ```
 
 ## 音楽理論の参考資料
