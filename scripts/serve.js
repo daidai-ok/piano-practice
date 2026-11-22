@@ -14,7 +14,7 @@ const server = createServer(async (req, res) => {
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
     // Only expose public application assets and known app routes, never repository metadata or scripts.
-    const appRoute = ['/', '/index.html', '/chords', '/circle', '/reading'].includes(pathname);
+    const appRoute = ['/', '/index.html', '/chords', '/circle', '/scales', '/reading'].includes(pathname);
     if (!(appRoute || pathname === '/favicon.svg' || pathname.startsWith('/src/'))) {
       res.writeHead(404); res.end('Not found'); return;
     }

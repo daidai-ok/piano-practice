@@ -115,15 +115,32 @@ export function getVoicedProgression(root, mode = 'major', voicing = 'root') {
 }
 
 export function getScale(root, mode = 'major', octave = 3) {
-  if (!['major', 'minor'].includes(mode)) throw new Error(`Unknown mode: ${mode}`);
-  const intervals = mode === 'major' ? [0, 2, 4, 5, 7, 9, 11, 12] : [0, 2, 3, 5, 7, 8, 10, 12];
-  const degrees = mode === 'major' ? ['1', '2', '3', '4', '5', '6', '7', '8'] : ['1', '2', '♭3', '4', '5', '♭6', '♭7', '8'];
+  if (!['major', 'minor', 'melodicMinor'].includes(mode)) throw new Error(`Unknown mode: ${mode}`);
+  const intervalsByMode = {
+    major: [0, 2, 4, 5, 7, 9, 11, 12],
+    minor: [0, 2, 3, 5, 7, 8, 10, 12],
+    melodicMinor: [0, 2, 3, 5, 7, 9, 11, 12],
+  };
+  const degreesByMode = {
+    major: ['1', '2', '3', '4', '5', '6', '7', '8'],
+    minor: ['1', '2', '♭3', '4', '5', '♭6', '♭7', '8'],
+    melodicMinor: ['1', '2', '♭3', '4', '5', '6', '7', '8'],
+  };
+  const stepsByMode = {
+    major: ['全', '全', '半', '全', '全', '全', '半'],
+    minor: ['全', '半', '全', '全', '半', '全', '全'],
+    melodicMinor: ['全', '半', '全', '全', '全', '全', '半'],
+  };
+  const namesByMode = { major: 'メジャースケール', minor: 'ナチュラルマイナースケール', melodicMinor: 'メロディックマイナースケール' };
+  const symbolsByMode = { major: 'major', minor: 'natural minor', melodicMinor: 'melodic minor' };
+  const intervals = intervalsByMode[mode];
+  const degrees = degreesByMode[mode];
   const rootMidi = 12 * (octave + 1) + pitchClass(root);
   return {
     root, mode,
-    symbol: `${root} ${mode === 'major' ? 'major' : 'natural minor'}`,
-    name: mode === 'major' ? 'メジャースケール' : 'ナチュラルマイナースケール',
-    steps: mode === 'major' ? ['全', '全', '半', '全', '全', '全', '半'] : ['全', '半', '全', '全', '半', '全', '全'],
+    symbol: `${root} ${symbolsByMode[mode]}`,
+    name: namesByMode[mode],
+    steps: stepsByMode[mode],
     notes: intervals.map((interval, index) => ({
       name: spellInterval(root, interval, index + 1),
       midi: rootMidi + interval,

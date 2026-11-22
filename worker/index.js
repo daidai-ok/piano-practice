@@ -2,7 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 
 const encoder = new TextEncoder();
 const challenge = 'Basic realm="voicing", charset="UTF-8"';
-const appRoutes = new Set(['/', '/index.html', '/chords', '/circle', '/reading']);
+const appRoutes = new Set(['/', '/index.html', '/chords', '/circle', '/scales', '/reading']);
 
 function credentialsFrom(request) {
   const match = /^Basic +([A-Za-z0-9+/]+={0,2})$/i.exec(request.headers.get('Authorization') ?? '');
