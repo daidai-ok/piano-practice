@@ -47,7 +47,9 @@ export default {
     }
 
     const assetUrl = new URL(request.url);
-    if (appRoutes.has(assetUrl.pathname)) assetUrl.pathname = '/index.html';
+    // The Static Assets HTML handler canonicalizes index.html URLs. Serve app routes
+    // from the root asset so that canonical redirects cannot loop back through this Worker.
+    if (appRoutes.has(assetUrl.pathname)) assetUrl.pathname = '/';
     const assetRequest = new Request(assetUrl, request);
     assetRequest.headers.delete('Authorization');
     const asset = await env.ASSETS.fetch(assetRequest);
