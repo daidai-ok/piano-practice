@@ -1,4 +1,4 @@
-import { ROOTS, ROOT_SPELLINGS, CIRCLE, RELATIVE_MINORS, MINOR_ROOTS, SIGNATURES, FOCUS_QUALITIES, QUALITIES, getChord, getVoicedProgression, getScale, circleTonic, practiceKey, keyboardKeys, pitchClass, midiLabel } from './theory.js';
+import { ROOTS, ROOT_SPELLINGS, CIRCLE, RELATIVE_MINORS, MINOR_ROOTS, SIGNATURES, FOCUS_QUALITIES, QUALITIES, SCALE_TYPES, getChord, getVoicedProgression, getScale, circleTonic, keyboardKeys, pitchClass, midiLabel } from './theory.js';
 import { PianoAudio } from './audio.js';
 import { CLEFS, staffNotes, staffNote } from './notation.js';
 import { readingView } from './reading.js';
@@ -28,7 +28,7 @@ const state = {
   quality: QUALITIES.some(item => item.id === saved.quality) ? saved.quality : 'maj7',
   tonic: ROOT_SPELLINGS.flat().includes(saved.tonic) ? saved.tonic : 'C',
   scaleRoot: ROOT_SPELLINGS.flat().includes(saved.scaleRoot) ? saved.scaleRoot : 'C',
-  scaleType: saved.scaleType === 'melodicMinor' ? 'melodicMinor' : 'major',
+  scaleType: SCALE_TYPES.some(scale => scale.id === saved.scaleType) ? saved.scaleType : 'major',
   mode: saved.mode === 'minor' ? 'minor' : 'major',
   voicing: saved.voicing === 'connected' ? 'connected' : 'root',
   reading: Object.fromEntries(CLEFS.map(clef => [clef.id, staffNotes(clef.id).some(note => note.midi === saved.reading?.[clef.id]) ? saved.reading[clef.id] : clef.referenceMidi])),
@@ -75,11 +75,6 @@ function chordSymbol(chord) {
 
 function selectedProgression() {
   return getVoicedProgression(state.tonic, state.mode, state.voicing);
-}
-
-function keyPractice(root, target) {
-  const next = practiceKey(root, 1, target === 'circle' ? state.mode : 'major');
-  return `<div class="key-practice"><div><button type="button" data-action="practice-key" data-target="${target}" data-value="-1" data-focus="${target}-previous-key" aria-label="前のキーへ">← 前のキー</button><button type="button" data-action="practice-key" data-target="${target}" data-value="1" data-focus="${target}-next-key" aria-label="次のキー ${next}へ">次：${next} ${icon('arrow')}</button></div></div>`;
 }
 
 function qualityChoices(qualities) {
@@ -138,36 +133,44 @@ function circleView() {
     <div class="wheel-panel">${circleWheel(progression)}</div>
     <div class="resolution-panel">
       <div class="resolution-controls"><div class="mode-switch" role="group" aria-label="解決先の調性"><button type="button" data-action="mode" data-value="major" data-focus="mode-major" aria-pressed="${state.mode === 'major'}">メジャー</button><button type="button" data-action="mode" data-value="minor" data-focus="mode-minor" aria-pressed="${state.mode === 'minor'}">マイナー</button></div></div>
-      <div class="destination-heading"><h2 class="destination-title">${state.tonic}<span> ${state.mode === 'major' ? 'major' : 'minor'}</span></h2><button type="button" class="button primary destination-play" data-action="play-progression" data-focus="play-progression" aria-label="Ⅱ–Ⅴ–Ⅰを聴く">${icon('play')}</button></div>
+      <div class="destination-heading"><button type="button" class="button primary destination-play" data-action="play-progression" data-focus="play-progression" aria-label="Ⅱ–Ⅴ–Ⅰを聴く">${icon('play')}</button></div>
       <p class="destination-description">${state.mode === 'major' ? 'Ⅱm7 → Ⅴ7 → Ⅰmaj7' : 'Ⅱm7♭5 → Ⅴ7 → Ⅰm(maj7)'}</p>
       ${state.mode === 'minor' ? '<p class="minor-explainer">マイナーのⅡ–Ⅴ–Ⅰは、解決感を作るためⅤ7とⅠm(maj7)に導音（上げた第7音）を使います。</p>' : ''}
     </div>
   </section>
   <section class="progression-section" aria-label="Ⅱ–Ⅴ–Ⅰの3つのコード"><div class="progression-heading"><h2><span class="sequence-title">Ⅱ <i>→</i> Ⅴ <i>→</i> Ⅰ</span><span class="sequence-subtitle">${state.tonic}へのツーファイブワン</span></h2></div>
     <div class="voicing-panel"><div class="voicing-heading"><h3>ルート入りのフォーノート</h3><div class="mode-switch" role="group" aria-label="Ⅱ–Ⅴ–Ⅰのヴォイシング"><button type="button" data-action="voicing" data-value="root" data-focus="voicing-root" aria-pressed="${state.voicing === 'root'}">基本形</button><button type="button" data-action="voicing" data-value="connected" data-focus="voicing-connected" aria-pressed="${state.voicing === 'connected'}">転回形でつなぐ</button></div></div>${state.voicing === 'connected' ? '<p>Ⅱは基本形から。Ⅴ・Ⅰは4つの音の移動が少なくなる転回形の一例です。ルートは濃い緑で示し、最低音とは限りません。</p>' : ''}</div>
-    ${keyPractice(state.tonic, 'circle')}
-    <div class="progression-grid">${progression.map((chord, index) => `<article class="progression-card" data-step="${index}"><div class="progression-card-top"><span class="roman-label degree-${index}">${chord.roman}</span><span>${chord.role}<span class="function-name"> · ${chord.functionName}</span></span><button type="button" class="icon-button" data-action="play-step" data-value="${index}" data-focus="step-${index}" aria-label="${chord.symbol}を聴く">${icon('play')}</button></div><h3 class="progression-chord">${chordSymbol(chord)}</h3>${state.voicing === 'connected' ? `<p class="voicing-caption">${chord.positionName} · 最低音 ${chord.notes[0].name}</p>` : ''}<p class="progression-notes">${chord.notes.map(note => note.name).join('<span> · </span>')}</p>${keyboard(chord, `step-${index}`, true)}<div class="card-bottom"><span aria-label="低い音からの度数">${chord.notes.map(note => note.degree).join(' · ')}</span><button type="button" data-action="inspect" data-value="${index}" data-focus="inspect-${index}">基本形を見る ${icon('arrow')}</button></div></article>`).join('')}</div>
+    <div class="progression-grid">${progression.map((chord, index) => `<article class="progression-card" data-step="${index}"><div class="progression-card-top"><span class="roman-label degree-${index}">${chord.roman}</span><h3 class="progression-chord">${chordSymbol(chord)}</h3><button type="button" class="icon-button" data-action="play-step" data-value="${index}" data-focus="step-${index}" aria-label="${chord.symbol}を聴く">${icon('play')}</button></div>${state.voicing === 'connected' ? `<p class="voicing-caption">${chord.positionName} · 最低音 ${chord.notes[0].name}</p>` : ''}${keyboard(chord, `step-${index}`, true)}</article>`).join('')}</div>
   </section>`;
 }
 
 function scalesView() {
   const scale = getScale(state.scaleRoot, state.scaleType);
   const selectedIndex = ROOTS.findIndex(root => pitchClass(root) === pitchClass(state.scaleRoot));
-  const isMajor = state.scaleType === 'major';
-  const lesson = isMajor
-    ? 'メジャースケールは、明るく安定した響きの基本となる7音の音階です。音程は全音・全音・半音・全音・全音・全音・半音の順に並びます。'
-    : 'メロディックマイナーは、ナチュラルマイナーの第6音と第7音を半音上げた音階です。ジャズでは上行・下行とも同じ音列を使います。';
+  const lessons = {
+    major: 'メジャースケールは、明るく安定した響きの基本となる7音の音階です。全音・全音・半音・全音・全音・全音・半音の順に進みます。',
+    melodicMinor: 'メロディックマイナーは、ナチュラルマイナーの第6音と第7音を半音上げた音階です。ジャズでは上行・下行とも同じ音列を使います。',
+    majorPentatonic: 'メジャーペンタトニックは、メジャースケールから第4音と第7音を抜いた5音の音階です。隣り合う音の半音のぶつかりがなく、親しみやすい響きになります。',
+    minorPentatonic: 'マイナーペンタトニックは、1・♭3・4・5・♭7の5音でできた音階です。ロックやブルースなどでよく使われ、ブルーススケールの土台になります。',
+    blues: 'ブルーススケールは、マイナーペンタトニックにブルーノートの♭5を加えた6音の音階です。♭5から5度へ半音でつなぐ動きが、ブルースらしい緊張感を生みます。',
+    diminishedWholeHalf: '全音・半音の順を交互にくり返す、8音のディミニッシュスケールです。全音・半音型と呼ばれる対称的な音階です。',
+    diminishedHalfWhole: '半音・全音の順を交互にくり返す、8音のディミニッシュスケールです。全音・半音型とは始まりが半音ずれた関係で、こちらも対称的な音階です。',
+  };
+  const lesson = lessons[state.scaleType];
+  const isMelodicMinor = state.scaleType === 'melodicMinor';
+  const isBlues = state.scaleType === 'blues';
   return `<div class="scale-page">
-    <header class="scale-intro"><p class="eyebrow">スケールを学ぶ</p><h1>メジャーとメロディックマイナー</h1><p class="page-description">ルートを選び、音程の並びと鍵盤上の音を確認しましょう。</p></header>
+    <header class="scale-intro"><p class="eyebrow">スケールを学ぶ</p><h1>音階の種類と使い方</h1><p class="page-description">ルートを選び、音程の並びと鍵盤上の音を確認しましょう。</p></header>
     <section class="scale-controls" aria-label="スケールの選択">
       <div class="scale-root-control"><div class="panel-title"><h2>ルート音</h2></div><div class="root-selector" role="group" aria-label="スケールのルート音">${ROOTS.map((root, index) => { const selected = selectedIndex === index; const label = selected ? state.scaleRoot : root; return `<button type="button" data-action="scale-root" data-value="${label}" data-focus="scale-root-${index}" aria-pressed="${selected}">${label}</button>`; }).join('')}</div></div>
-      <div class="scale-type-control"><div class="panel-title"><h2>スケールの種類</h2></div><div class="mode-switch scale-type-switch" role="group" aria-label="スケールの種類"><button type="button" data-action="scale-type" data-value="major" data-focus="scale-type-major" aria-pressed="${isMajor}">メジャー</button><button type="button" data-action="scale-type" data-value="melodicMinor" data-focus="scale-type-melodic" aria-pressed="${!isMajor}">メロディックマイナー</button></div></div>
+      <div class="scale-type-control"><div class="panel-title"><h2>スケールの種類</h2></div><div class="mode-switch scale-type-switch" role="group" aria-label="スケールの種類">${SCALE_TYPES.map(item => `<button type="button" data-action="scale-type" data-value="${item.id}" data-focus="scale-type-${item.id}" aria-pressed="${state.scaleType === item.id}">${item.label}</button>`).join('')}</div></div>
     </section>
     <section class="scale-lesson" aria-label="${scale.root}${scale.name}">
       <div class="scale-lesson-heading"><h2><span>${scale.root}</span> ${scale.name}</h2><button type="button" class="button secondary" data-action="play-scale" data-focus="play-scale">${icon('notes')}<span>スケールを聴く</span></button></div>
-      <p class="scale-explanation">${lesson}${!isMajor ? ' クラシックの旋律的短音階では、下行形をナチュラルマイナーにする扱いもあります。' : ''}</p>
+      <p class="scale-explanation">${lesson}${isMelodicMinor ? ' クラシックの旋律的短音階では、下行形をナチュラルマイナーにする扱いもあります。' : ''}</p>
+      ${isBlues ? `<aside class="scale-evolution" aria-label="マイナーペンタトニックからブルーススケールへの発展"><div class="scale-evolution-formula"><div><span>マイナーペンタトニック</span><strong>1 · ♭3 · 4 · 5 · ♭7</strong></div><span class="scale-evolution-add">＋ ♭5</span><div class="scale-evolution-result"><span>ブルーススケール</span><strong>1 · ♭3 · 4 · ♭5 · 5 · ♭7</strong></div></div><p>4度と5度のあいだに♭5（ブルーノート）を加えると、音の流れにブルースらしい揺れが生まれます。</p><button type="button" data-action="scale-type" data-value="minorPentatonic" data-focus="scale-type-minorPentatonic">マイナーペンタトニックと比べる ${icon('arrow')}</button></aside>` : ''}
       <div class="scale-study-grid">
-        <section class="scale-notes-panel" aria-label="スケールの構成音"><div class="panel-title"><h3>構成音と度数</h3></div><div class="scale-tones">${scale.notes.map(note => `<div class="scale-tone ${note.isRoot ? 'is-root' : ''}"><span>${note.degree}</span><strong>${note.name}</strong></div>`).join('')}</div><div class="scale-step-pattern"><span>音程</span>${scale.steps.map(step => `<strong>${step}</strong>`).join('')}</div></section>
+        <section class="scale-notes-panel" aria-label="スケールの構成音"><div class="panel-title"><h3>構成音と度数</h3></div><div class="scale-tones" style="--tone-columns:${scale.notes.length === 9 ? 3 : 4}">${scale.notes.map(note => `<div class="scale-tone ${note.isRoot ? 'is-root' : ''}"><span>${note.degree}</span><strong>${note.name}</strong></div>`).join('')}</div><div class="scale-step-pattern" style="--step-count:${scale.steps.length}"><span>音程</span>${scale.steps.map(step => `<strong>${step}</strong>`).join('')}</div></section>
         <div class="instrument-panel"><div class="instrument-heading"><span>${icon('keyboard')} 鍵盤で確認</span><span>C3 — C5</span></div>${keyboard(scale, 'scale')}<div class="key-legend"><span><i class="root-dot"></i>ルート</span><span><i class="tone-dot"></i>構成音</span></div></div>
       </div>
     </section>
@@ -268,10 +271,6 @@ app.addEventListener('click', async event => {
     if (action === 'scale-type') state.scaleType = value;
     if (action === 'mode') { state.mode = value; state.tonic = circleTonic(state.tonic, value); }
     if (action === 'voicing') state.voicing = value;
-    if (action === 'practice-key') {
-      if (target.dataset.target === 'chords') state.root = practiceKey(state.root, Number(value));
-      else state.tonic = practiceKey(state.tonic, Number(value), state.mode);
-    }
     if (action === 'view') { event.preventDefault(); state.view = value; }
     if (action === 'reading-middle') { state.reading.treble = 60; state.reading.bass = 60; }
     if (action === 'home') { event.preventDefault(); state.view = 'chords'; }
