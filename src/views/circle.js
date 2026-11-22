@@ -29,7 +29,7 @@ export function renderCircleView(state) {
       ${state.mode === 'minor' ? '<p class="minor-explainer">マイナーのⅡ–Ⅴ–Ⅰは、解決感を作るためⅤ7とⅠm(maj7)に導音（上げた第7音）を使います。</p>' : ''}
     </div>
   </section>
-  <section class="progression-section" aria-label="Ⅱ–Ⅴ–Ⅰの3つのコード"><div class="progression-heading"><h2><span class="sequence-title">Ⅱ <i>→</i> Ⅴ <i>→</i> Ⅰ</span><span class="sequence-subtitle">${state.tonic}へのツーファイブワン</span></h2></div>
+  <section class="progression-section" aria-label="Ⅱ–Ⅴ–Ⅰの3つのコード">
     <div class="voicing-panel"><div class="voicing-heading"><h3>ルート入りのフォーノート</h3><div class="mode-switch" role="group" aria-label="Ⅱ–Ⅴ–Ⅰのヴォイシング"><button type="button" data-action="voicing" data-value="root" data-focus="voicing-root" aria-pressed="${state.voicing === 'root'}">基本形</button><button type="button" data-action="voicing" data-value="connected" data-focus="voicing-connected" aria-pressed="${state.voicing === 'connected'}">転回形でつなぐ</button></div></div>${state.voicing === 'connected' ? '<p>Ⅱは基本形から。Ⅴ・Ⅰは4つの音の移動が少なくなる転回形の一例です。ルートは濃い緑で示し、最低音とは限りません。</p>' : ''}</div>
     <div class="progression-grid">${progression.map((chord, index) => `<article class="progression-card" data-step="${index}"><div class="progression-card-top"><span class="roman-label degree-${index}">${chord.roman}</span><h3 class="progression-chord">${renderChordSymbol(chord)}</h3><button type="button" class="icon-button" data-action="play-step" data-value="${index}" data-focus="step-${index}" aria-label="${chord.symbol}を聴く">${icon('play')}</button></div>${state.voicing === 'connected' ? `<p class="voicing-caption">${chord.positionName} · 最低音 ${chord.notes[0].name}</p>` : ''}${renderKeyboard(chord, `step-${index}`, true)}</article>`).join('')}</div>
   </section>`;

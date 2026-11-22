@@ -144,7 +144,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .circle-center > span { font-size: 9px; color: var(--color-muted); white-space: nowrap; }
 .circle-center strong { font: 500 46px/1.2 var(--font-display); color: var(--color-accent); }
 .circle-center .center-mode { font-size: 8px; letter-spacing: 1.8px; margin-top: 4px; }
-.resolution-panel { min-width: 0; padding: 24px 0; border-top: 1px solid var(--color-line); }
+.resolution-panel { min-width: 0; padding: 24px 0; }
 .mode-switch { display: inline-flex; padding: 4px; gap: 4px; background: var(--color-instrument); border: 1px solid var(--color-line); border-radius: 6px; }
 .mode-switch button { padding: 9px 20px; min-height: 36px; font-size: 11px; border-radius: 4px; color: var(--color-muted); }
 .mode-switch button:hover { color: var(--color-ink); }
@@ -297,7 +297,7 @@ h1 { font-size: clamp(24px, 2.35vw, 34px); letter-spacing: -.055em; line-height:
 .other-chords summary { font-size: 11px; color: var(--color-muted); cursor: pointer; padding-block: 8px; }
 .other-chords summary:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; }
 .other-chords .quality-list { margin-top: 8px; }
-.voicing-panel { padding: 20px 0; margin-bottom: 20px; border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); }
+.voicing-panel { padding: 20px 0; margin-bottom: 20px; }
 .voicing-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; }
 .voicing-heading h3 { font-size: 12px; font-weight: 600; }
 .voicing-heading .mode-switch button { padding-inline: 12px; }
